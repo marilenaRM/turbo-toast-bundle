@@ -1,0 +1,26 @@
+{
+    "name": "@marilenarm/turbo-toast",
+    "description": "Stimulus controller rendering Turbo Stream toast notifications without the session.",
+    "license": "MIT",
+    "version": "1.0.0",
+    "symfony": {
+        "controllers": {
+            "toast": {
+                "main": "dist/controller.js",
+                "fetch": "eager",
+                "enabled": true
+            },
+            "toast-container": {
+                "main": "dist/toast_container_controller.js",
+                "fetch": "eager",
+                "enabled": true
+            }
+        },
+        "importmap": {
+            "@hotwired/stimulus": "^3.0.0"
+        }
+    },
+    "peerDependencies": {
+        "@hotwired/stimulus": "^3.0.0"
+    }
+}

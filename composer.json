@@ -1,0 +1,48 @@
+{
+    "name": "marilenarm/turbo-toast-bundle",
+    "description": "Session-free flash/toast notifications for Symfony that keep your pages HTTP-cacheable, via Turbo Streams and a cookie transport.",
+    "keywords": ["symfony", "bundle", "turbo", "stimulus", "toast", "flash", "notifications", "hotwire", "http-cache", "stateless"],
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marilena Ruffelaere",
+            "email": "marilena.ruffelaere@gmail.com",
+            "homepage": "https://github.com/marilenaRM"
+        }
+    ],
+    "require": {
+        "php": ">=8.3",
+        "symfony/config": "^7.0",
+        "symfony/dependency-injection": "^7.0",
+        "symfony/event-dispatcher": "^7.0",
+        "symfony/http-foundation": "^7.0",
+        "symfony/http-kernel": "^7.0",
+        "symfony/service-contracts": "^3.5",
+        "symfony/stimulus-bundle": "^2.13",
+        "symfony/ux-turbo": "^2.13",
+        "twig/twig": "^3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0",
+        "symfony/framework-bundle": "^7.0",
+        "symfony/twig-bundle": "^7.0"
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "autoload": {
+        "psr-4": {
+            "MarilenaRM\\TurboToastBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "MarilenaRM\\TurboToastBundle\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable"
+}

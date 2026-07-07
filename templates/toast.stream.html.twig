@@ -1,0 +1,12 @@
+{% for toast in toasts %}
+    <turbo-stream action="append" target="{{ target }}">
+        <template>
+            {{- include('@MarilenaRMTurboToast/toast.html.twig', {
+                message: toast.message,
+                type: toast.type,
+                delay: toast.delay ?? default_delay,
+                controller: controller,
+            }) -}}
+        </template>
+    </turbo-stream>
+{% endfor %}

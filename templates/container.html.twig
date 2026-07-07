@@ -1,0 +1,7 @@
+<div id="{{ target }}"
+     aria-live="polite"
+     data-turbo-permanent
+     {{ stimulus_controller('marilenarm/turbo-toast/toast-container', {
+         cookieName: cookie_name,
+         toastController: toast_controller,
+     }) }}></div>
