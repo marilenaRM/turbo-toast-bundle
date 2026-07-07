@@ -202,3 +202,8 @@ marilena_rm_turbo_toast:
     stream_template: '@MarilenaRMTurboToast/toast.stream.html.twig'
     cookie_name: turbo_toast  # cookie used by deferToast() across redirects
 ```
+
+---
+
+If this bundle saved your pages from the session lock, you can
+[buy me a coffee](https://ko-fi.com/marilenarm) ☕

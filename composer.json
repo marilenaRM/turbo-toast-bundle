@@ -44,5 +44,11 @@
     "config": {
         "sort-packages": true
     },
+    "funding": [
+        {
+            "type": "ko-fi",
+            "url": "https://ko-fi.com/marilenarm"
+        }
+    ],
     "minimum-stability": "stable"
 }
