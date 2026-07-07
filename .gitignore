@@ -1,6 +1,6 @@
 /vendor/
 /composer.lock
-/node_modules/
+node_modules/
 /.phpunit.cache/
 /.phpunit.result.cache
 /var/

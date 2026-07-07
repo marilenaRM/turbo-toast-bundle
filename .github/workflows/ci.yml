@@ -39,3 +39,15 @@ jobs:
 
             - name: Check dist is in sync with src
               run: diff -ru assets/src assets/dist
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
+
+            - name: Install JS dependencies
+              run: npm ci
+              working-directory: assets
+
+            - name: Run Stimulus controller tests
+              run: npx vitest run
+              working-directory: assets

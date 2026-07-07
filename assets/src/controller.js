@@ -10,7 +10,7 @@ export default class extends Controller {
     };
 
     connect() {
-        requestAnimationFrame(() => this.element.classList.add('toast--in'));
+        this.frame = requestAnimationFrame(() => this.element.classList.add('toast--in'));
 
         if (this.delayValue > 0) {
             this.timeout = setTimeout(() => this.dismiss(), this.delayValue);
@@ -18,10 +18,12 @@ export default class extends Controller {
     }
 
     disconnect() {
+        cancelAnimationFrame(this.frame);
         clearTimeout(this.timeout);
     }
 
     dismiss() {
+        cancelAnimationFrame(this.frame);
         clearTimeout(this.timeout);
         this.element.classList.remove('toast--in');
         this.element.addEventListener(
