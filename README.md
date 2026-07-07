@@ -187,6 +187,10 @@ How the cookie transport behaves:
 - never set on 5xx responses: a request that ended in a server error discards
   its queued toasts instead of promising success on the next page.
 
+Each of these addresses a concrete failure scenario — see the
+[security & hardening design notes](docs/hardening.md) for the full threat
+model and the reasoning behind every protection.
+
 ## Configuration
 
 ```yaml
