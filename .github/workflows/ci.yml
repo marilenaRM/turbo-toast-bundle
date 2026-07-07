@@ -29,6 +29,9 @@ jobs:
             - name: Run tests
               run: vendor/bin/phpunit
 
+            - name: Lint Twig templates
+              run: vendor/bin/twig-cs-fixer lint
+
     assets:
         runs-on: ubuntu-latest
         steps:

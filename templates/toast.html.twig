@@ -1,6 +1,6 @@
 <div class="toast toast--{{ type }}"
      role="{{ 'error' == type ? 'alert' : 'status' }}"
-     {{ stimulus_controller(controller, { delay: delay }) }}
+     {{ stimulus_controller(controller, {delay: delay}) }}
      {{ stimulus_action(controller, 'dismiss', 'click') }}>
     {{ message }}
 </div>
