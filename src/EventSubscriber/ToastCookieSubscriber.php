@@ -46,11 +46,17 @@ final class ToastCookieSubscriber implements EventSubscriberInterface
         }
 
         $response = $event->getResponse();
-        $toasts = $this->stack->drain();
 
         // A request that ended in a server error must not promise success on
-        // the next page: the drained toasts are discarded, not transported.
-        if ([] === $toasts || $response->isServerError()) {
+        // the next page: discard the queued toasts instead of transporting them.
+        if ($response->isServerError()) {
+            $this->stack->reset();
+
+            return;
+        }
+
+        $toasts = $this->stack->drain();
+        if ([] === $toasts) {
             return;
         }
 
