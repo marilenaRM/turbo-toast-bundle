@@ -191,6 +191,37 @@ Each of these addresses a concrete failure scenario — see the
 [security & hardening design notes](docs/hardening.md) for the full threat
 model and the reasoning behind every protection.
 
+### Customizing cookie-rendered toasts
+
+Two hooks, both keeping the message XSS-safe (`textContent` only):
+
+**Template** — write the container manually (instead of `turbo_toast_container()`)
+and put a `<template>` target inside it. Its root element is cloned per toast,
+receives the `toast--{type}` class and the delay value; the message lands in the
+`[data-toast-message]` element (or the root when none is declared):
+
+```twig
+<div id="toasts" aria-live="polite" data-turbo-permanent
+     {{ stimulus_controller('marilenarm/turbo-toast/toast-container') }}>
+    <template data-marilenarm--turbo-toast--toast-container-target="template">
+        <div class="my-toast" data-controller="marilenarm--turbo-toast--toast">
+            <twig:ux:icon name="lucide:check" />
+            <span data-toast-message></span>
+        </div>
+    </template>
+</div>
+```
+
+**Event** — take over rendering entirely by cancelling the
+`marilenarm--turbo-toast--toast-container:append` event:
+
+```js
+document.addEventListener('marilenarm--turbo-toast--toast-container:append', (event) => {
+    event.preventDefault();
+    myToastLibrary.show(event.detail.toast.message, event.detail.toast.type);
+});
+```
+
 ## Configuration
 
 ```yaml

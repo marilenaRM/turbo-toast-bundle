@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MarilenaRM\TurboToastBundle\Twig;
 
+use MarilenaRM\TurboToastBundle\Toast\ToastConfig;
 use Twig\Environment;
 
 /**
@@ -14,18 +15,16 @@ final readonly class TurboToastRuntime
 {
     public function __construct(
         private Environment $twig,
-        private string $target,
-        private string $controllerName,
-        private string $cookieName,
+        private ToastConfig $config,
     ) {
     }
 
     public function renderContainer(): string
     {
         return $this->twig->render('@MarilenaRMTurboToast/container.html.twig', [
-            'target' => $this->target,
-            'cookie_name' => $this->cookieName,
-            'toast_controller' => $this->normalizeControllerName($this->controllerName),
+            'target' => $this->config->target,
+            'cookie_name' => $this->config->cookieName,
+            'toast_controller' => $this->normalizeControllerName($this->config->controllerName),
         ]);
     }
 

@@ -48,15 +48,15 @@ final class MarilenaRMTurboToastBundle extends AbstractBundle
             ->end();
     }
 
-    public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
+    public function loadExtension(array $config, ContainerConfigurator $configurator, ContainerBuilder $container): void
     {
-        $container->parameters()
+        $configurator->parameters()
             ->set('marilena_rm_turbo_toast.target', $config['target'])
             ->set('marilena_rm_turbo_toast.controller_name', $config['controller_name'])
             ->set('marilena_rm_turbo_toast.default_delay', $config['default_delay'])
             ->set('marilena_rm_turbo_toast.stream_template', $config['stream_template'])
             ->set('marilena_rm_turbo_toast.cookie_name', $config['cookie_name']);
 
-        $container->import('../config/services.php');
+        $configurator->import('../config/services.php');
     }
 }

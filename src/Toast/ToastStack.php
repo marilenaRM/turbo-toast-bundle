@@ -15,7 +15,7 @@ use Symfony\Contracts\Service\ResetInterface;
  * RoadRunner, Swoole) never leak an undrained stack into the next
  * request, which could belong to another user.
  */
-final class ToastStack implements ResetInterface
+final class ToastStack implements ResetInterface, \Countable
 {
     /**
      * @var list<Toast>
@@ -45,5 +45,10 @@ final class ToastStack implements ResetInterface
     public function reset(): void
     {
         $this->toasts = [];
+    }
+
+    public function count(): int
+    {
+        return \count($this->toasts);
     }
 }

@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace MarilenaRM\TurboToastBundle\EventSubscriber;
 
 use MarilenaRM\TurboToastBundle\Toast\Toast;
+use MarilenaRM\TurboToastBundle\Toast\ToastConfig;
 use MarilenaRM\TurboToastBundle\Toast\ToastStack;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -27,8 +29,8 @@ final class ToastCookieSubscriber implements EventSubscriberInterface
 
     public function __construct(
         private readonly ToastStack $stack,
-        private readonly string $cookieName,
-        private readonly int $defaultDelay,
+        private readonly ToastConfig $config,
+        private readonly ?LoggerInterface $logger = null,
     ) {
     }
 
@@ -50,6 +52,9 @@ final class ToastCookieSubscriber implements EventSubscriberInterface
         // A request that ended in a server error must not promise success on
         // the next page: discard the queued toasts instead of transporting them.
         if ($response->isServerError()) {
+            if (0 < $count = \count($this->stack)) {
+                $this->logger?->warning('Discarded {count} queued toast(s): the response is a server error.', ['count' => $count]);
+            }
             $this->stack->reset();
 
             return;
@@ -63,23 +68,32 @@ final class ToastCookieSubscriber implements EventSubscriberInterface
         $payload = array_map(fn (Toast $toast): array => [
             'message' => $toast->message,
             'type' => $toast->type,
-            'delay' => $toast->delay ?? $this->defaultDelay,
+            'delay' => $toast->delay ?? $this->config->defaultDelay,
         ], $toasts);
 
+        $dropped = 0;
         do {
             $value = $this->encode($payload);
             if (\strlen(rawurlencode($value)) <= self::MAX_COOKIE_SIZE) {
                 break;
             }
             array_pop($payload);
+            ++$dropped;
         } while ([] !== $payload);
+
+        if (0 < $dropped) {
+            $this->logger?->warning('Dropped {dropped} of {total} queued toast(s) exceeding the cookie size budget.', [
+                'dropped' => $dropped,
+                'total' => \count($toasts),
+            ]);
+        }
 
         if ([] === $payload) {
             return;
         }
 
         $response->headers->setCookie(
-            Cookie::create($this->cookieName)
+            Cookie::create($this->config->cookieName)
                 ->withValue($value)
                 ->withPath('/')
                 ->withSecure($event->getRequest()->isSecure())
@@ -91,6 +105,11 @@ final class ToastCookieSubscriber implements EventSubscriberInterface
         // cache (same protection as AbstractSessionListener for the session).
         $response->setPrivate();
         $response->headers->removeCacheControlDirective('s-maxage');
+
+        $this->logger?->debug('Deferred {count} toast(s) into the "{cookie}" cookie.', [
+            'count' => \count($payload),
+            'cookie' => $this->config->cookieName,
+        ]);
     }
 
     /**

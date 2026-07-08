@@ -136,4 +136,58 @@ describe('toast-container controller', () => {
 
         expect(container.firstElementChild.getAttribute('data-toast-delay-value')).toBe('0');
     });
+
+    it('lets a listener cancel the default rendering', async () => {
+        const seen = [];
+        const cancel = (event) => {
+            seen.push(event.detail.toast.message);
+            event.preventDefault();
+        };
+        document.addEventListener('toast-container:append', cancel);
+
+        try {
+            setCookie([{ message: 'Custom-rendered', type: 'info', delay: 0 }]);
+
+            const container = await mount();
+
+            expect(container.children).toHaveLength(0);
+            expect(seen).toEqual(['Custom-rendered']);
+        } finally {
+            document.removeEventListener('toast-container:append', cancel);
+        }
+    });
+
+    it('clones the template target when present', async () => {
+        setCookie([{ message: 'From template', type: 'warning', delay: 2000 }]);
+
+        const container = await mount(`<div id="toasts" data-controller="toast-container"
+            data-toast-container-cookie-name-value="turbo_toast"
+            data-toast-container-toast-controller-value="toast">
+            <template data-toast-container-target="template">
+                <div class="custom-toast"><strong>!</strong><span data-toast-message></span></div>
+            </template>
+        </div>`);
+
+        const toast = container.querySelector('.custom-toast');
+        expect(toast).not.toBeNull();
+        expect(toast.classList.contains('toast--warning')).toBe(true);
+        expect(toast.getAttribute('data-toast-delay-value')).toBe('2000');
+        expect(toast.querySelector('[data-toast-message]').textContent).toBe('From template');
+        expect(toast.querySelector('strong').textContent).toBe('!'); // template markup preserved
+    });
+
+    it('keeps the template path XSS-safe', async () => {
+        setCookie([{ message: '<img src=x onerror="window.__pwned = true">', type: 'info', delay: 0 }]);
+
+        const container = await mount(`<div id="toasts" data-controller="toast-container"
+            data-toast-container-cookie-name-value="turbo_toast"
+            data-toast-container-toast-controller-value="toast">
+            <template data-toast-container-target="template">
+                <div class="custom-toast"><span data-toast-message></span></div>
+            </template>
+        </div>`);
+
+        expect(container.querySelector('.custom-toast img')).toBeNull();
+        expect(window.__pwned).toBeUndefined();
+    });
 });

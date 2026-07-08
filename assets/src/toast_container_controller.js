@@ -12,6 +12,8 @@ import { Controller } from '@hotwired/stimulus';
  * textContent (never innerHTML) and the type is restricted to [\w-].
  */
 export default class extends Controller {
+    static targets = ['template'];
+
     static values = {
         cookieName: { type: String, default: 'turbo_toast' },
         // Normalized Stimulus identifier of the auto-registered toast controller.
@@ -56,11 +58,27 @@ export default class extends Controller {
         }
     }
 
-    append({ message, type = 'success', delay = 5000 }) {
+    append(toast) {
+        // Customization hook 1: a cancelable event. Listeners may render the
+        // toast themselves and call preventDefault() to skip the default path.
+        const event = this.dispatch('append', { detail: { toast }, cancelable: true });
+        if (event.defaultPrevented) {
+            return;
+        }
+
+        const safeType = String(toast.type ?? 'success').replace(/[^\w-]/g, '');
+        const el = this.hasTemplateTarget
+            ? this.fromTemplate(toast, safeType)
+            : this.defaultToast(toast, safeType);
+
+        if (el) {
+            this.element.append(el);
+        }
+    }
+
+    defaultToast({ message, delay = 5000 }, safeType) {
         const name = this.toastControllerValue;
         const el = document.createElement('div');
-
-        const safeType = String(type).replace(/[^\w-]/g, '');
 
         el.className = `toast toast--${safeType}`;
         el.setAttribute('role', 'error' === safeType ? 'alert' : 'status');
@@ -69,6 +87,24 @@ export default class extends Controller {
         el.setAttribute('data-action', `click->${name}#dismiss`);
         el.textContent = String(message); // never innerHTML: the cookie is untrusted input
 
-        this.element.append(el);
+        return el;
+    }
+
+    // Customization hook 2: a <template> target inside the container owns the
+    // markup. Its root is cloned per toast; the message lands (as text) in the
+    // [data-toast-message] element, or in the root when none is declared.
+    fromTemplate({ message, delay = 5000 }, safeType) {
+        const el = this.templateTarget.content.firstElementChild?.cloneNode(true);
+        if (!el) {
+            return null;
+        }
+
+        el.classList.add(`toast--${safeType}`);
+        el.setAttribute(`data-${this.toastControllerValue}-delay-value`, String(parseInt(delay, 10) || 0));
+
+        const slot = el.querySelector('[data-toast-message]') ?? el;
+        slot.textContent = String(message); // never innerHTML: the cookie is untrusted input
+
+        return el;
     }
 }

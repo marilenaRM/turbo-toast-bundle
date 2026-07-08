@@ -18,10 +18,7 @@ final readonly class ToastRenderer
     public function __construct(
         private Environment $twig,
         private RequestStack $requestStack,
-        private string $streamTemplate,
-        private string $target,
-        private string $controllerName,
-        private int $defaultDelay,
+        private ToastConfig $config,
     ) {
     }
 
@@ -32,11 +29,11 @@ final readonly class ToastRenderer
             throw new \LogicException(\sprintf('The current request does not accept Turbo Streams ("%s" not in the Accept header). A toast rendered here would reach the browser as raw markup. Use deferToast() before returning a redirect instead.', TurboBundle::STREAM_MEDIA_TYPE));
         }
 
-        $html = $this->twig->render($this->streamTemplate, [
+        $html = $this->twig->render($this->config->streamTemplate, [
             'toasts' => $toasts,
-            'target' => $this->target,
-            'controller' => $this->controllerName,
-            'default_delay' => $this->defaultDelay,
+            'target' => $this->config->target,
+            'controller' => $this->config->controllerName,
+            'default_delay' => $this->config->defaultDelay,
         ]);
 
         return new Response($html, Response::HTTP_OK, [

@@ -20,6 +20,17 @@ final class ToastStackTest extends TestCase
         self::assertSame([], $stack->drain());
     }
 
+    public function testCountReflectsTheQueuedToasts(): void
+    {
+        $stack = new ToastStack();
+
+        self::assertCount(0, $stack);
+
+        $stack->push(new Toast('One'), new Toast('Two'));
+
+        self::assertCount(2, $stack);
+    }
+
     public function testResetEmptiesTheStack(): void
     {
         $stack = new ToastStack();

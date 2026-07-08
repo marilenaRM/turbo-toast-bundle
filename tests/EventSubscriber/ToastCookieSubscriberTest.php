@@ -7,7 +7,10 @@ namespace MarilenaRM\TurboToastBundle\Tests\EventSubscriber;
 use PHPUnit\Framework\TestCase;
 use MarilenaRM\TurboToastBundle\EventSubscriber\ToastCookieSubscriber;
 use MarilenaRM\TurboToastBundle\Toast\Toast;
+use MarilenaRM\TurboToastBundle\Toast\ToastConfig;
 use MarilenaRM\TurboToastBundle\Toast\ToastStack;
+use Psr\Log\AbstractLogger;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -188,6 +191,35 @@ final class ToastCookieSubscriberTest extends TestCase
         self::assertTrue($response->headers->hasCacheControlDirective('public'));
     }
 
+    public function testServerErrorDiscardIsLogged(): void
+    {
+        $stack = new ToastStack();
+        $stack->push(new Toast('One'), new Toast('Two'));
+        $logger = $this->createSpyLogger();
+
+        $this->dispatch($stack, new Response(status: Response::HTTP_INTERNAL_SERVER_ERROR), logger: $logger);
+
+        self::assertCount(1, $logger->records);
+        self::assertSame('warning', $logger->records[0]['level']);
+        self::assertSame(2, $logger->records[0]['context']['count']);
+    }
+
+    public function testBudgetDropIsLogged(): void
+    {
+        $stack = new ToastStack();
+        $stack->push(new Toast('Short and sweet'), new Toast(str_repeat('x', 5000)));
+        $logger = $this->createSpyLogger();
+
+        $response = new Response();
+        $this->dispatch($stack, $response, logger: $logger);
+
+        $warnings = array_values(array_filter($logger->records, fn (array $r): bool => 'warning' === $r['level']));
+        self::assertCount(1, $warnings);
+        self::assertSame(1, $warnings[0]['context']['dropped']);
+        self::assertSame(2, $warnings[0]['context']['total']);
+        self::assertNotNull($this->findCookie($response, 'turbo_toast'));
+    }
+
     private function dispatch(
         ToastStack $stack,
         Response $response,
@@ -195,8 +227,19 @@ final class ToastCookieSubscriberTest extends TestCase
         int $defaultDelay = 5000,
         int $requestType = HttpKernelInterface::MAIN_REQUEST,
         ?Request $request = null,
+        ?LoggerInterface $logger = null,
     ): void {
-        $subscriber = new ToastCookieSubscriber($stack, $cookieName, $defaultDelay);
+        $subscriber = new ToastCookieSubscriber(
+            $stack,
+            new ToastConfig(
+                target: 'toasts',
+                controllerName: 'marilenarm/turbo-toast/toast',
+                cookieName: $cookieName,
+                defaultDelay: $defaultDelay,
+                streamTemplate: '@MarilenaRMTurboToast/toast.stream.html.twig',
+            ),
+            $logger,
+        );
 
         $subscriber->onKernelResponse(new ResponseEvent(
             $this->createStub(HttpKernelInterface::class),
@@ -204,6 +247,22 @@ final class ToastCookieSubscriberTest extends TestCase
             $requestType,
             $response,
         ));
+    }
+
+    /**
+     * @return AbstractLogger&object{records: list<array{level: string, message: string, context: array<string, mixed>}>}
+     */
+    private function createSpyLogger(): AbstractLogger
+    {
+        return new class extends AbstractLogger {
+            /** @var list<array{level: string, message: string, context: array<string, mixed>}> */
+            public array $records = [];
+
+            public function log($level, \Stringable|string $message, array $context = []): void
+            {
+                $this->records[] = ['level' => (string) $level, 'message' => (string) $message, 'context' => $context];
+            }
+        };
     }
 
     private function findCookie(Response $response, string $name): ?Cookie

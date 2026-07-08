@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MarilenaRM\TurboToastBundle\Tests;
 
 use PHPUnit\Framework\TestCase;
+use MarilenaRM\TurboToastBundle\Toast\ToastConfig;
 use MarilenaRM\TurboToastBundle\Toast\ToastRenderer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -25,10 +26,22 @@ abstract class TwigTestCase extends TestCase
         return new ToastRenderer(
             self::createTwig(),
             $requestStack ?? self::createTurboRequestStack(),
-            '@MarilenaRMTurboToast/toast.stream.html.twig',
-            $target,
-            $controllerName,
-            $defaultDelay,
+            self::createConfig(target: $target, controllerName: $controllerName, defaultDelay: $defaultDelay),
+        );
+    }
+
+    protected static function createConfig(
+        string $target = 'toasts',
+        string $controllerName = 'marilenarm/turbo-toast/toast',
+        string $cookieName = 'turbo_toast',
+        int $defaultDelay = 5000,
+    ): ToastConfig {
+        return new ToastConfig(
+            target: $target,
+            controllerName: $controllerName,
+            cookieName: $cookieName,
+            defaultDelay: $defaultDelay,
+            streamTemplate: '@MarilenaRMTurboToast/toast.stream.html.twig',
         );
     }
 

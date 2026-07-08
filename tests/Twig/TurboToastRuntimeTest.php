@@ -45,6 +45,9 @@ final class TurboToastRuntimeTest extends TwigTestCase
         string $controllerName = 'marilenarm/turbo-toast/toast',
         string $cookieName = 'turbo_toast',
     ): TurboToastRuntime {
-        return new TurboToastRuntime(self::createTwig(), $target, $controllerName, $cookieName);
+        return new TurboToastRuntime(
+            self::createTwig(),
+            self::createConfig(target: $target, controllerName: $controllerName, cookieName: $cookieName),
+        );
     }
 }
