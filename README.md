@@ -222,6 +222,13 @@ document.addEventListener('marilenarm--turbo-toast--toast-container:append', (ev
 });
 ```
 
+## Profiler
+
+In debug mode, a **Turbo Toast** panel appears in the Symfony profiler: every
+toast emitted during the request, per transport (Turbo Stream / cookie), with
+the queued / transported / discarded counts for the cookie path. Zero overhead
+outside `kernel.debug` — the traceable decorators are only wired there.
+
 ## Configuration
 
 ```yaml

@@ -5,7 +5,9 @@ declare(strict_types=1);
 use MarilenaRM\TurboToastBundle\EventSubscriber\ToastCookieSubscriber;
 use MarilenaRM\TurboToastBundle\Toast\ToastConfig;
 use MarilenaRM\TurboToastBundle\Toast\ToastRenderer;
+use MarilenaRM\TurboToastBundle\Toast\ToastRendererInterface;
 use MarilenaRM\TurboToastBundle\Toast\ToastStack;
+use MarilenaRM\TurboToastBundle\Toast\ToastStackInterface;
 use MarilenaRM\TurboToastBundle\Twig\TurboToastExtension;
 use MarilenaRM\TurboToastBundle\Twig\TurboToastRuntime;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -28,7 +30,7 @@ return static function (ContainerConfigurator $container): void {
 
     $services->set('marilena_rm_turbo_toast.stack', ToastStack::class)
         ->tag('kernel.reset', ['method' => 'reset']);
-    $services->alias(ToastStack::class, 'marilena_rm_turbo_toast.stack');
+    $services->alias(ToastStackInterface::class, 'marilena_rm_turbo_toast.stack');
 
     $services->set('marilena_rm_turbo_toast.renderer', ToastRenderer::class)
         ->args([
@@ -36,7 +38,7 @@ return static function (ContainerConfigurator $container): void {
             service('request_stack'),
             service('marilena_rm_turbo_toast.config'),
         ]);
-    $services->alias(ToastRenderer::class, 'marilena_rm_turbo_toast.renderer');
+    $services->alias(ToastRendererInterface::class, 'marilena_rm_turbo_toast.renderer');
 
     $services->set('marilena_rm_turbo_toast.cookie_subscriber', ToastCookieSubscriber::class)
         ->args([

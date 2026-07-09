@@ -6,7 +6,7 @@ namespace MarilenaRM\TurboToastBundle\EventSubscriber;
 
 use MarilenaRM\TurboToastBundle\Toast\Toast;
 use MarilenaRM\TurboToastBundle\Toast\ToastConfig;
-use MarilenaRM\TurboToastBundle\Toast\ToastStack;
+use MarilenaRM\TurboToastBundle\Toast\ToastStackInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -28,7 +28,7 @@ final class ToastCookieSubscriber implements EventSubscriberInterface
     private const MAX_COOKIE_SIZE = 3800;
 
     public function __construct(
-        private readonly ToastStack $stack,
+        private readonly ToastStackInterface $stack,
         private readonly ToastConfig $config,
         private readonly ?LoggerInterface $logger = null,
     ) {

@@ -13,7 +13,7 @@ use Twig\Environment;
  * Builds a turbo-stream {@see Response} that appends toasts to the DOM,
  * without ever touching the session or the flash bag.
  */
-final readonly class ToastRenderer
+final readonly class ToastRenderer implements ToastRendererInterface
 {
     public function __construct(
         private Environment $twig,

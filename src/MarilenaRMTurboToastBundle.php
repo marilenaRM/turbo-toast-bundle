@@ -58,5 +58,9 @@ final class MarilenaRMTurboToastBundle extends AbstractBundle
             ->set('marilena_rm_turbo_toast.cookie_name', $config['cookie_name']);
 
         $configurator->import('../config/services.php');
+
+        if ($container->getParameter('kernel.debug')) {
+            $configurator->import('../config/debug.php');
+        }
     }
 }

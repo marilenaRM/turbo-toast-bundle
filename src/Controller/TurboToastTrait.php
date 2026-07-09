@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace MarilenaRM\TurboToastBundle\Controller;
 
 use MarilenaRM\TurboToastBundle\Toast\Toast;
-use MarilenaRM\TurboToastBundle\Toast\ToastRenderer;
-use MarilenaRM\TurboToastBundle\Toast\ToastStack;
+use MarilenaRM\TurboToastBundle\Toast\ToastRendererInterface;
+use MarilenaRM\TurboToastBundle\Toast\ToastStackInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -20,17 +20,17 @@ use Symfony\Contracts\Service\Attribute\Required;
  */
 trait TurboToastTrait
 {
-    private ToastRenderer $turboToastRenderer;
-    private ToastStack $turboToastStack;
+    private ToastRendererInterface $turboToastRenderer;
+    private ToastStackInterface $turboToastStack;
 
     #[Required]
-    public function setTurboToastRenderer(ToastRenderer $turboToastRenderer): void
+    public function setTurboToastRenderer(ToastRendererInterface $turboToastRenderer): void
     {
         $this->turboToastRenderer = $turboToastRenderer;
     }
 
     #[Required]
-    public function setTurboToastStack(ToastStack $turboToastStack): void
+    public function setTurboToastStack(ToastStackInterface $turboToastStack): void
     {
         $this->turboToastStack = $turboToastStack;
     }

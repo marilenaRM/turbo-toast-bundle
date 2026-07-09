@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace MarilenaRM\TurboToastBundle\Toast;
 
-use Symfony\Contracts\Service\ResetInterface;
-
 /**
  * Request-scoped accumulator for toasts that must survive a classic
  * full-page redirect (POST -> GET). Drained by the cookie subscriber
@@ -15,7 +13,7 @@ use Symfony\Contracts\Service\ResetInterface;
  * RoadRunner, Swoole) never leak an undrained stack into the next
  * request, which could belong to another user.
  */
-final class ToastStack implements ResetInterface, \Countable
+final class ToastStack implements ToastStackInterface
 {
     /**
      * @var list<Toast>
