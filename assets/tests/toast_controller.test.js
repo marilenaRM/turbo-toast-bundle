@@ -20,6 +20,17 @@ const mount = async (html) => {
     return document.body.firstElementChild;
 };
 
+const mountToast = ({ delay = 0, click = false, style = '' } = {}) => mount(
+    `<div data-controller="toast" data-toast-delay-value="${delay}"`
+    + `${click ? ' data-action="click->toast#dismiss"' : ''}`
+    + `${style ? ` style="${style}"` : ''}>Hi</div>`,
+);
+
+const dismissByClick = async (el) => {
+    await sleep(50); // let requestAnimationFrame fire
+    el.click();
+};
+
 afterEach(async () => {
     document.body.innerHTML = '';
     await nextTick();
@@ -28,7 +39,7 @@ afterEach(async () => {
 
 describe('toast controller', () => {
     it('fades the toast in on connect', async () => {
-        const el = await mount('<div data-controller="toast" data-toast-delay-value="0">Hi</div>');
+        const el = await mountToast();
 
         await sleep(50); // let requestAnimationFrame fire
 
@@ -36,9 +47,7 @@ describe('toast controller', () => {
     });
 
     it('auto-dismisses after the configured delay and leaves the DOM after the transition', async () => {
-        const el = await mount(
-            `<div data-controller="toast" data-toast-delay-value="10" style="${TRANSITION}">Hi</div>`,
-        );
+        const el = await mountToast({ delay: 10, style: TRANSITION });
 
         await sleep(80);
 
@@ -51,7 +60,7 @@ describe('toast controller', () => {
     });
 
     it('does not auto-dismiss when the delay is 0', async () => {
-        const el = await mount('<div data-controller="toast" data-toast-delay-value="0">Hi</div>');
+        const el = await mountToast();
 
         await sleep(80);
 
@@ -60,12 +69,9 @@ describe('toast controller', () => {
     });
 
     it('dismisses on click', async () => {
-        const el = await mount(
-            `<div data-controller="toast" data-toast-delay-value="0" data-action="click->toast#dismiss" style="${TRANSITION}">Hi</div>`,
-        );
+        const el = await mountToast({ click: true, style: TRANSITION });
 
-        await sleep(50);
-        el.click();
+        await dismissByClick(el);
 
         expect(el.classList.contains('toast--in')).toBe(false);
         expect(document.body.contains(el)).toBe(true);
@@ -76,23 +82,17 @@ describe('toast controller', () => {
     });
 
     it('removes the toast immediately when no transition applies', async () => {
-        const el = await mount(
-            '<div data-controller="toast" data-toast-delay-value="0" data-action="click->toast#dismiss">Hi</div>',
-        );
+        const el = await mountToast({ click: true });
 
-        await sleep(50);
-        el.click();
+        await dismissByClick(el);
 
         expect(document.body.contains(el)).toBe(false);
     });
 
     it('removes the toast even if transitionend never fires', async () => {
-        const el = await mount(
-            `<div data-controller="toast" data-toast-delay-value="0" data-action="click->toast#dismiss" style="${TRANSITION}">Hi</div>`,
-        );
+        const el = await mountToast({ click: true, style: TRANSITION });
 
-        await sleep(50);
-        el.click();
+        await dismissByClick(el);
 
         expect(document.body.contains(el)).toBe(true);
 
@@ -102,12 +102,9 @@ describe('toast controller', () => {
     });
 
     it('accounts for transition-delay in the fallback timeout', async () => {
-        const el = await mount(
-            `<div data-controller="toast" data-toast-delay-value="0" data-action="click->toast#dismiss" style="${TRANSITION} transition-delay: 0.1s;">Hi</div>`,
-        );
+        const el = await mountToast({ click: true, style: `${TRANSITION} transition-delay: 0.1s;` });
 
-        await sleep(50);
-        el.click();
+        await dismissByClick(el);
 
         await sleep(180); // shorter than 150ms duration + 100ms delay
 
