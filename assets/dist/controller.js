@@ -1,5 +1,9 @@
 import { Controller } from '@hotwired/stimulus';
 
+// Grace period added to the transition duration before the fallback removal
+// fires, absorbing timer jitter so it never races the real transitionend.
+const TRANSITION_END_GRACE_MS = 50;
+
 /*
  * Toast controller: fades a toast in on connect, auto-dismisses after a delay,
  * removes itself from the DOM once the exit transition ends
@@ -21,12 +25,13 @@ export default class extends Controller {
     disconnect() {
         cancelAnimationFrame(this.frame);
         clearTimeout(this.timeout);
-        clearTimeout(this.removeTimeout);
+        this.cancelPendingRemoval();
     }
 
     dismiss() {
         cancelAnimationFrame(this.frame);
         clearTimeout(this.timeout);
+        this.cancelPendingRemoval();
         this.element.classList.remove('toast--in');
 
         const duration = this.transitionDurationMs();
@@ -37,15 +42,32 @@ export default class extends Controller {
             return;
         }
 
-        const remove = () => {
-            clearTimeout(this.removeTimeout);
-            this.element.remove();
+        this.onTransitionEnd = (event) => {
+            // transitionend bubbles, so a descendant's transition (custom
+            // templates) would trigger this too — react only to our own.
+            if (event.target === this.element) {
+                this.removeElement();
+            }
         };
+        this.element.addEventListener('transitionend', this.onTransitionEnd);
 
-        this.element.addEventListener('transitionend', remove, { once: true });
         // Safety net: transitionend never fires when the transition is
         // interrupted or the element is hidden before it completes.
-        this.removeTimeout = setTimeout(remove, duration + 50);
+        this.removeTimeout = setTimeout(() => this.removeElement(), duration + TRANSITION_END_GRACE_MS);
+    }
+
+    removeElement() {
+        this.cancelPendingRemoval();
+        this.element.remove();
+    }
+
+    cancelPendingRemoval() {
+        clearTimeout(this.removeTimeout);
+
+        if (this.onTransitionEnd) {
+            this.element.removeEventListener('transitionend', this.onTransitionEnd);
+            this.onTransitionEnd = null;
+        }
     }
 
     transitionDurationMs() {
