@@ -359,17 +359,17 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
       <div class="stat reveal">
         <div class="n">Cacheable</div>
         <h3>Full-page cache, intact</h3>
-        <p>The message travels next to the page — in a stream or a cookie — never inside it. Varnish and your CDN keep serving.</p>
+        <p>The message travels next to the page, not inside it — carried by a stream or a cookie. Varnish and your CDN keep serving.</p>
       </div>
       <div class="stat reveal">
         <div class="n">Parallel</div>
         <h3>Frames stop serializing</h3>
-        <p>No session lock means concurrent requests — several lazy Turbo Frames at once — no longer queue behind each other.</p>
+        <p>With no session lock, concurrent requests stop queuing behind each other — several lazy Turbo Frames can finally load at once.</p>
       </div>
       <div class="stat reveal">
         <div class="n">Stateless</div>
-        <h3>Stateless routes stay so</h3>
-        <p>No session cookie is ever created just to show a notification. What was stateless remains stateless.</p>
+        <h3>Stateless stays stateless</h3>
+        <p>No session cookie is created just to show a notification, and that was the last thing still opening one.</p>
       </div>
     </div>
   </div>
@@ -467,7 +467,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
   <div class="wrap">
     <p class="eyebrow reveal">Be honest with your profiler</p>
     <h2 class="head reveal">This is a scalpel, not a default.</h2>
-    <p class="lead reveal">It only helps where the flash was the <em>last</em> thing forcing a session. Everywhere else, keep <code>addFlash()</code> — and this README will tell you so.</p>
+    <p class="lead reveal">It only helps where the flash was the <em>last</em> thing forcing a session. Everywhere else, keep <code>addFlash()</code> if you like it.</p>
 
     <div class="honest">
       <div class="hcol hcol--yes reveal">
@@ -489,7 +489,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
         </ul>
       </div>
     </div>
-    <p class="note-line reveal">Profile first — in Blackfire, look for <code>session_start</code> and serialized concurrent requests. Then decide.</p>
+    <p class="note-line reveal">Profile first (in Blackfire, look for <code>session_start</code> and serialized concurrent requests), then decide.</p>
   </div>
 </section>
 
