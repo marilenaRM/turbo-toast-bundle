@@ -2,6 +2,8 @@
 
 **Flash messages that keep your pages HTTP-cacheable.**
 
+[**Live overview →**](https://marilenarm.github.io/turbo-toast-bundle/) · [**Runnable demo app →**](https://github.com/marilenaRM/turbo-toast-demo) — session-free flows you can click through.
+
 A page that touches the session cannot be stored by a shared HTTP cache — Symfony
 marks it `private`, and Varnish or your CDN will never serve it. The classic
 `$this->addFlash()` does exactly that: it drags the session (and its lock) into

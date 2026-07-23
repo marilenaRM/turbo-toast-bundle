@@ -5,3 +5,4 @@ node_modules/
 /.phpunit.result.cache
 /var/
 /.twig-cs-fixer.cache
+/.claude/

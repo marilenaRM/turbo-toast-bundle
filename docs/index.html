@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TurboToastBundle — flash messages that keep your pages cacheable</title>
+<meta name="description" content="Session-free flash notifications for Symfony. Keep anonymous pages HTTP-cacheable behind Varnish or a CDN — toasts travel via Turbo Streams or a short-lived cookie, never the session.">
+<meta name="author" content="Marilena Ruffelaere">
+<meta name="theme-color" content="#0f172a">
+<meta property="og:type" content="website">
+<meta property="og:title" content="TurboToastBundle — flash messages that keep your pages cacheable">
+<meta property="og:description" content="The flash message leaves the PHP session. Anonymous pages stay fast, parallel, and fully cacheable — the notification travels next to the page, not inside it.">
+<meta property="og:url" content="https://marilenarm.github.io/turbo-toast-bundle/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%9E%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f6f8fb; --paper-2:#eceff4; --card:#ffffff;
+  --ink:#0f172a; --ink-2:#1e293b; --slate:#334155;
+  --muted:#586372; --line:#dde3ea;
+  --dark-fg:#e6ebf2; --dark-fg-2:#9aa7b8; --line-d:#25324a; --card-d:#16233b;
+  --ok:#16a34a; --ok-2:#4ade80; --err:#dc2626; --err-2:#f87171;
+  --warn:#d97706; --warn-2:#fbbf24; --info:#2563eb; --info-2:#60a5fa;
+  --mono:'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sans:'Archivo', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --maxw:1080px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+/* let grid/flex children shrink below their content so code & header lines scroll instead of widening the page */
+.hero__grid>*,.split>*,.api-grid>*,.cards2>*,.stats>*,.feat>*,.honest>*,.step>*{min-width:0}
+body{
+  margin:0; background:var(--paper); color:var(--ink-2);
+  font-family:var(--sans); font-size:clamp(1rem,0.96rem + 0.2vw,1.08rem);
+  line-height:1.62; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+a{color:inherit}
+code{font-family:var(--mono); font-size:0.86em}
+::selection{background:#bbf7d0; color:#052e16}
+
+.wrap{max-width:var(--maxw); margin-inline:auto; padding-inline:clamp(1.2rem,4vw,2rem)}
+.band{padding-block:clamp(3.6rem,8vw,6.2rem)}
+.band--dark{background:var(--ink); color:var(--dark-fg)}
+.band--tint{background:var(--paper-2)}
+.eyebrow{
+  font-family:var(--mono); font-size:0.72rem; font-weight:500;
+  letter-spacing:0.2em; text-transform:uppercase; color:var(--muted);
+  display:flex; align-items:center; gap:0.6rem; margin:0 0 1.1rem;
+}
+.eyebrow::before{content:""; width:1.6rem; height:1px; background:currentColor; opacity:0.55}
+.band--dark .eyebrow{color:var(--dark-fg-2)}
+h2.head{
+  font-size:clamp(1.75rem,1.2rem + 2.4vw,2.7rem); font-weight:800;
+  letter-spacing:-0.025em; line-height:1.04; margin:0 0 1rem;
+}
+.lead{font-size:1.12rem; color:var(--slate); max-width:52ch}
+.band--dark .lead{color:#c3cddb}
+
+/* ---------- nav ---------- */
+.nav{position:sticky; top:0; z-index:900; background:rgba(15,23,42,0.82);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--line-d)}
+.nav__in{display:flex; align-items:center; justify-content:space-between;
+  height:56px; color:var(--dark-fg)}
+.brand{display:flex; align-items:center; gap:0.55rem; font-family:var(--mono);
+  font-weight:600; font-size:0.95rem; letter-spacing:-0.01em; text-decoration:none; white-space:nowrap}
+@media(max-width:440px){.brand .crumb{display:none}}
+.brand b{color:#fff}
+.brand .crumb{color:var(--ok-2)}
+.brand .glyph{font-size:1.05rem; line-height:1}
+.nav__links{display:flex; gap:1.4rem; align-items:center; font-family:var(--mono);
+  font-size:0.82rem; color:var(--dark-fg-2)}
+.nav__links a{text-decoration:none; transition:color .15s}
+.nav__links a:hover{color:#fff}
+.nav__links .hide-sm{}
+@media(max-width:620px){.nav__links .hide-sm{display:none}}
+
+/* ---------- hero ---------- */
+.hero{background:
+    radial-gradient(120% 90% at 85% -10%, rgba(37,99,235,0.18), transparent 55%),
+    radial-gradient(90% 80% at 5% 0%, rgba(22,163,74,0.12), transparent 50%),
+    var(--ink);
+  color:var(--dark-fg); padding-block:clamp(3.4rem,7vw,5.6rem) clamp(3.6rem,8vw,6rem);
+  overflow:hidden}
+.hero__grid{display:grid; grid-template-columns:1.05fr 0.95fr; gap:clamp(2rem,5vw,4rem); align-items:center}
+@media(max-width:860px){.hero__grid{grid-template-columns:1fr; gap:2.6rem}}
+.hero .tagline{font-family:var(--mono); font-size:0.74rem; letter-spacing:0.22em;
+  text-transform:uppercase; color:var(--dark-fg-2); margin:0 0 1.3rem;
+  display:flex; gap:0.7rem; flex-wrap:wrap; align-items:center}
+.hero .tagline i{font-style:normal; color:var(--ok-2)}
+.hero h1{font-size:clamp(2.5rem,1.4rem + 5vw,4.5rem); font-weight:800; line-height:0.98;
+  letter-spacing:-0.035em; margin:0 0 1.3rem; color:#fff}
+.hero h1 .em{color:var(--ok-2); position:relative; white-space:nowrap}
+.hero h1 .em::after{content:""; position:absolute; left:0; right:0; bottom:0.08em; height:0.09em;
+  background:var(--ok-2); opacity:0.35; border-radius:2px}
+.hero p.sub{font-size:1.14rem; color:#c3cddb; max-width:46ch; margin:0 0 2rem}
+.hero p.sub code{color:#fff; background:rgba(255,255,255,0.08); padding:0.08em 0.35em; border-radius:4px}
+
+.install{display:flex; align-items:stretch; gap:0; max-width:29rem;
+  border:1px solid var(--line-d); border-radius:9px; background:#0b1526; overflow:hidden}
+.install__cmd{font-family:var(--mono); font-size:0.82rem; color:#dce6f3;
+  padding:0.75rem 0.95rem; overflow-x:auto; white-space:nowrap; flex:1; display:flex; align-items:center}
+.install__cmd .pr{color:var(--ok-2); margin-right:0.55rem; user-select:none}
+.install__copy{border:0; border-left:1px solid var(--line-d); background:#132038; color:#9fb0c7;
+  font-family:var(--mono); font-size:0.72rem; letter-spacing:0.05em; padding-inline:0.95rem;
+  cursor:pointer; transition:background .15s,color .15s}
+.install__copy:hover{background:#1a2c4d; color:#fff}
+.cta-row{display:flex; gap:0.8rem; margin-top:1.4rem; flex-wrap:wrap}
+.btn{display:inline-flex; align-items:center; gap:0.5rem; text-decoration:none;
+  font-weight:600; font-size:0.92rem; padding:0.6rem 1.05rem; border-radius:8px; transition:transform .12s, background .15s, border-color .15s}
+.btn:active{transform:translateY(1px)}
+.btn--primary{background:var(--ok); color:#fff}
+.btn--primary:hover{background:#15873f}
+.btn--ghost{border:1px solid var(--line-d); color:var(--dark-fg)}
+.btn--ghost:hover{border-color:#3b4d70; background:rgba(255,255,255,0.03)}
+
+/* ---------- inspector (signature) ---------- */
+.inspector{background:linear-gradient(180deg,#0c1728,#0a1322); border:1px solid var(--line-d);
+  border-radius:12px; box-shadow:0 22px 50px -20px rgba(0,0,0,0.6); overflow:hidden; font-family:var(--mono)}
+.inspector__bar{display:flex; align-items:center; gap:0.5rem; padding:0.7rem 0.95rem;
+  border-bottom:1px solid var(--line-d); background:#0b1424}
+.dot{width:0.62rem; height:0.62rem; border-radius:50%; display:inline-block}
+.dot--r{background:#ff5f57}.dot--y{background:#febc2e}.dot--g{background:#28c840}
+.inspector__title{margin-left:0.5rem; font-size:0.72rem; color:#8493a8; letter-spacing:0.02em}
+.inspector__body{padding:1.05rem 1.1rem 1.2rem}
+.req{font-size:0.78rem; color:#8fa1b8; margin-bottom:0.9rem; display:flex; justify-content:space-between}
+.req .ok{color:var(--ok-2)}
+.iblock{padding:0.7rem 0.8rem; border-radius:8px; margin-bottom:0.7rem; border:1px solid transparent}
+.iblock:last-child{margin-bottom:0}
+.iblock--bad{background:rgba(220,38,38,0.07); border-color:rgba(220,38,38,0.25)}
+.iblock--good{background:rgba(22,163,74,0.08); border-color:rgba(22,163,74,0.28)}
+.iblock .cap{font-size:0.68rem; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:0.5rem; color:#8493a8}
+.iblock .cap code{color:#c9d5e6; text-transform:none; letter-spacing:0}
+.hline{font-size:0.76rem; line-height:1.85; overflow-wrap:anywhere}
+.hline .k{color:#7f8ea3}
+.hline--bad .v{color:var(--err-2); text-decoration:line-through; text-decoration-color:rgba(248,113,113,0.5)}
+.hline--good .v{color:var(--ok-2)}
+.hline .note{color:#6b7a90; font-style:italic}
+.verdict{display:inline-flex; align-items:center; gap:0.35rem; font-size:0.72rem; margin-top:0.4rem}
+.verdict--bad{color:var(--err-2)} .verdict--good{color:var(--ok-2)}
+
+/* ---------- generic sections ---------- */
+.split{display:grid; grid-template-columns:0.85fr 1.15fr; gap:clamp(1.6rem,4vw,3.4rem); align-items:start}
+@media(max-width:820px){.split{grid-template-columns:1fr; gap:1.6rem}}
+.prose p{margin:0 0 1rem} .prose p:last-child{margin-bottom:0}
+.prose code{background:var(--paper-2); padding:0.1em 0.36em; border-radius:4px; color:var(--slate)}
+.band--dark .prose code{background:rgba(255,255,255,0.08); color:#dbe4ef}
+
+.stats{display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:2.4rem}
+@media(max-width:720px){.stats{grid-template-columns:1fr}}
+.stat{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:1.3rem 1.25rem}
+.stat .n{font-family:var(--mono); font-size:0.72rem; letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--ok); margin-bottom:0.6rem}
+.stat h3{margin:0 0 0.35rem; font-size:1.06rem; font-weight:700; letter-spacing:-0.01em}
+.stat p{margin:0; font-size:0.94rem; color:var(--muted)}
+
+/* two transports */
+.cards2{display:grid; grid-template-columns:1fr 1fr; gap:1.3rem; margin-top:2.4rem}
+@media(max-width:760px){.cards2{grid-template-columns:1fr}}
+.tcard{border:1px solid var(--line); border-radius:14px; background:var(--card); padding:1.5rem 1.5rem 1.35rem; position:relative}
+.tcard__badge{font-family:var(--mono); font-size:0.7rem; letter-spacing:0.12em; text-transform:uppercase;
+  padding:0.28rem 0.6rem; border-radius:999px; display:inline-block; margin-bottom:0.95rem}
+.tcard--stream .tcard__badge{background:#dbeafe; color:#1d4ed8}
+.tcard--cookie .tcard__badge{background:#fef3c7; color:#b45309}
+.tcard h3{margin:0 0 0.5rem; font-size:1.22rem; font-weight:700; letter-spacing:-0.015em}
+.tcard p{margin:0 0 1rem; font-size:0.96rem; color:var(--muted)}
+.mini{font-family:var(--mono); font-size:0.8rem; background:#0d1727; color:#dbe4ef;
+  border-radius:8px; padding:0.7rem 0.85rem; overflow-x:auto}
+.mini .fn{color:var(--warn-2)} .mini .str{color:var(--ok-2)} .mini .kw{color:var(--info-2)} .mini .var{color:#e2e8f0}
+
+/* code blocks (dark) */
+pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
+  background:#0c1728; border:1px solid var(--line-d); border-radius:12px; padding:1.15rem 1.25rem;
+  overflow-x:auto; color:#cdd8e6; -webkit-overflow-scrolling:touch}
+.band--dark pre.code{background:#0a1220}
+.tok-c{color:#647087; font-style:italic}
+.tok-s{color:var(--ok-2)}
+.tok-k{color:var(--info-2)}
+.tok-f{color:var(--warn-2)}
+.tok-v{color:#e7edf5}
+.tok-a{color:#f0abfc}
+.code-label{font-family:var(--mono); font-size:0.72rem; color:var(--dark-fg-2);
+  letter-spacing:0.1em; text-transform:uppercase; margin:0 0 0.55rem; display:block}
+.stack{display:grid; gap:1.4rem}
+.api-grid{display:grid; grid-template-columns:1fr 1fr; gap:1.4rem}
+@media(max-width:820px){.api-grid{grid-template-columns:1fr}}
+
+/* verb table */
+.verbs{width:100%; border-collapse:collapse; margin:1.8rem 0 0; font-size:0.94rem}
+.verbs th,.verbs td{text-align:left; padding:0.75rem 0.9rem; border-bottom:1px solid var(--line-d)}
+.verbs th{font-family:var(--mono); font-size:0.7rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--dark-fg-2); font-weight:500}
+.verbs td code{color:var(--ok-2); background:rgba(255,255,255,0.05); padding:0.12em 0.4em; border-radius:4px}
+.verbs tr:last-child td{border-bottom:0}
+
+/* demo */
+.demo{margin-top:2rem; border:1px dashed var(--line-d); border-radius:12px; padding:1.3rem;
+  display:flex; flex-wrap:wrap; align-items:center; gap:0.7rem; background:rgba(255,255,255,0.02)}
+.demo .demo__hint{font-family:var(--mono); font-size:0.78rem; color:var(--dark-fg-2); width:100%; margin-bottom:0.3rem}
+.demo__hint a{color:#fff; text-decoration:underline; text-underline-offset:2px}
+.chip{border:0; cursor:pointer; font-family:var(--sans); font-weight:600; font-size:0.88rem;
+  color:#fff; padding:0.55rem 0.95rem; border-radius:8px; transition:transform .12s, filter .15s;
+  display:inline-flex; align-items:center; gap:0.45rem}
+.chip:hover{filter:brightness(1.08)} .chip:active{transform:translateY(1px)}
+.chip--success{background:var(--ok)} .chip--error{background:var(--err)}
+.chip--warning{background:var(--warn)} .chip--info{background:var(--info)}
+
+/* honesty */
+.honest{display:grid; grid-template-columns:1fr 1fr; gap:1.3rem; margin-top:2.4rem}
+@media(max-width:760px){.honest{grid-template-columns:1fr}}
+.hcol{border-radius:14px; padding:1.5rem; border:1px solid var(--line)}
+.hcol--yes{background:#f0fdf4; border-color:#bbf7d0}
+.hcol--no{background:#fef2f2; border-color:#fecaca}
+.hcol h3{margin:0 0 0.9rem; font-size:1.05rem; font-weight:700; display:flex; align-items:center; gap:0.5rem}
+.hcol--yes h3{color:#15803d} .hcol--no h3{color:#b91c1c}
+.hcol ul{margin:0; padding-left:1.1rem} .hcol li{margin-bottom:0.55rem; font-size:0.95rem; color:var(--slate)}
+.hcol li:last-child{margin-bottom:0}
+.note-line{margin-top:1.8rem; font-family:var(--mono); font-size:0.85rem; color:var(--muted);
+  border-left:3px solid var(--warn); padding-left:0.9rem}
+
+/* features */
+.feat{display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-top:2.4rem}
+@media(max-width:900px){.feat{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.feat{grid-template-columns:1fr}}
+.fcard{border:1px solid var(--line); border-radius:12px; padding:1.15rem; background:var(--card)}
+.fcard .ic{font-size:1.15rem; margin-bottom:0.55rem; display:block}
+.fcard h3{margin:0 0 0.3rem; font-size:0.98rem; font-weight:700; letter-spacing:-0.01em}
+.fcard p{margin:0; font-size:0.88rem; color:var(--muted); line-height:1.55}
+
+/* install steps */
+.steps{counter-reset:s; margin-top:2.2rem; display:grid; gap:1.1rem}
+.step{display:grid; grid-template-columns:auto 1fr; gap:1rem; align-items:start}
+.step__n{counter-increment:s; width:2rem; height:2rem; border-radius:50%; flex:none;
+  display:grid; place-items:center; font-family:var(--mono); font-size:0.85rem; font-weight:600;
+  background:var(--ink); color:#fff}
+.step__n::before{content:counter(s)}
+.step__b h3{margin:0 0 0.3rem; font-size:1rem; font-weight:700}
+.step__b p{margin:0 0 0.7rem; color:var(--muted); font-size:0.94rem}
+.step__b p:last-child{margin-bottom:0}
+
+/* footer */
+.foot{background:var(--ink); color:var(--dark-fg); padding-block:clamp(2.8rem,6vw,4rem)}
+.foot__grid{display:flex; justify-content:space-between; gap:2rem; flex-wrap:wrap; align-items:flex-start}
+.foot p{margin:0.4rem 0 0; color:var(--dark-fg-2); font-size:0.9rem; max-width:40ch}
+.foot__links{display:flex; flex-direction:column; gap:0.5rem; font-family:var(--mono); font-size:0.85rem}
+.foot__links a{color:var(--dark-fg-2); text-decoration:none; transition:color .15s}
+.foot__links a:hover{color:#fff}
+.kofi{display:inline-flex; align-items:center; gap:0.5rem; margin-top:1.3rem;
+  font-size:0.9rem; color:#c3cddb}
+.kofi a{color:var(--warn-2); text-decoration:none; font-weight:600}
+.foot__bottom{margin-top:2.4rem; padding-top:1.4rem; border-top:1px solid var(--line-d);
+  font-family:var(--mono); font-size:0.76rem; color:#6b7a90; display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.6rem}
+
+/* reveal */
+.reveal{opacity:0; transform:translateY(14px); transition:opacity .6s ease, transform .6s ease}
+.reveal.in{opacity:1; transform:none}
+
+/* ---------- live toasts (exact bundle behaviour) ---------- */
+#toasts{position:fixed; top:1rem; right:1rem; z-index:1080; display:flex; flex-direction:column;
+  gap:0.5rem; pointer-events:none}
+.toast{pointer-events:auto; min-width:16rem; max-width:24rem; padding:0.75rem 1rem; border-radius:0.375rem;
+  color:#fff; background:#334155; box-shadow:0 4px 12px rgb(0 0 0 / 15%); cursor:pointer;
+  opacity:0; transform:translateY(-8px); transition:opacity .2s ease, transform .2s ease}
+.toast--in{opacity:1; transform:translateY(0)}
+.toast--success{background:#16a34a}.toast--error{background:#dc2626}
+.toast--warning{background:#d97706}.toast--info{background:#2563eb}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .reveal{opacity:1; transform:none; transition:none}
+  .toast{transition:opacity .2s ease}
+  .toast, .toast--in{transform:none}
+}
+:focus-visible{outline:2px solid var(--info-2); outline-offset:2px; border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- live toast region -->
+<div id="toasts" aria-live="polite" aria-atomic="false"></div>
+
+<!-- nav -->
+<nav class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="#top"><span class="glyph">🍞</span><b>turbo-toast</b><span class="crumb">/ bundle</span></a>
+    <div class="nav__links">
+      <a class="hide-sm" href="#problem">Problem</a>
+      <a class="hide-sm" href="#api">API</a>
+      <a class="hide-sm" href="#fit">When to use</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/marilenaRM/turbo-toast-bundle" target="_blank" rel="noopener">GitHub&nbsp;↗</a>
+    </div>
+  </div>
+</nav>
+
+<!-- hero -->
+<header class="hero" id="top">
+  <div class="wrap hero__grid">
+    <div>
+      <p class="tagline"><i>◆</i> Symfony&nbsp;7 bundle <span>·</span> PHP&nbsp;8.3+ <span>·</span> MIT</p>
+      <h1>Flash messages that keep your pages&nbsp;<span class="em">cacheable</span>.</h1>
+      <p class="sub"><code>$this-&gt;addFlash()</code> quietly opens the PHP session — and a page that touches the session can never be stored by Varnish or your CDN. This bundle takes the toast out of the session, so anonymous pages stay fast, parallel, and fully cacheable.</p>
+
+      <div class="install" role="group" aria-label="Install command">
+        <div class="install__cmd" id="installCmd"><span class="pr">$</span>composer require marilenarm/turbo-toast-bundle</div>
+        <button class="install__copy" id="copyBtn" type="button" aria-label="Copy install command">copy</button>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn btn--primary" href="#api">See the API</a>
+        <a class="btn btn--ghost" href="https://github.com/marilenaRM/turbo-toast-bundle" target="_blank" rel="noopener">Read the docs ↗</a>
+        <a class="btn btn--ghost" href="https://github.com/marilenaRM/turbo-toast-demo" target="_blank" rel="noopener">Run the demo ↗</a>
+      </div>
+    </div>
+
+    <!-- signature: HTTP response inspector -->
+    <div class="inspector reveal" aria-hidden="true">
+      <div class="inspector__bar">
+        <span class="dot dot--r"></span><span class="dot dot--y"></span><span class="dot dot--g"></span>
+        <span class="inspector__title">response headers · GET /catalog</span>
+      </div>
+      <div class="inspector__body">
+        <div class="req"><span>GET&nbsp;&nbsp;/catalog</span><span class="ok">200 OK</span></div>
+
+        <div class="iblock iblock--bad">
+          <div class="cap">with <code>$this-&gt;addFlash('success', …)</code></div>
+          <div class="hline hline--bad"><span class="k">cache-control:</span> <span class="v">private, must-revalidate</span></div>
+          <div class="hline hline--bad"><span class="k">set-cookie:</span> <span class="v">PHPSESSID=…</span> <span class="note">→ session lock</span></div>
+          <div class="verdict verdict--bad">✗ never enters the shared cache</div>
+        </div>
+
+        <div class="iblock iblock--good">
+          <div class="cap">with <code>$this-&gt;toast('Item saved')</code></div>
+          <div class="hline hline--good"><span class="k">cache-control:</span> <span class="v">public, s-maxage=3600</span></div>
+          <div class="hline hline--good"><span class="k">— no set-cookie, no session</span></div>
+          <div class="verdict verdict--good">✓ served straight from the CDN</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- problem -->
+<section class="band" id="problem">
+  <div class="wrap">
+    <div class="split">
+      <div class="reveal">
+        <p class="eyebrow">The cost of a flash</p>
+        <h2 class="head">One flash message.<br>Zero cache hits.</h2>
+      </div>
+      <div class="prose reveal">
+        <p>The session lock is paid once per request — whatever opens the session. On an otherwise stateless page, a flash message is often the <em>only</em> thing that opens it.</p>
+        <p>Symfony reacts by marking the response <code>private</code>, so Varnish or your CDN drops it. The session lock serializes concurrent requests, so your lazy Turbo Frames stop loading in parallel. And a session cookie gets created just to say <em>“Item saved.”</em></p>
+        <p>Take the flash out of the session and the page needs no session at all. Nothing forces it uncacheable anymore.</p>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat reveal">
+        <div class="n">Cacheable</div>
+        <h3>Full-page cache, intact</h3>
+        <p>The message travels next to the page, not inside it — carried by a stream or a cookie. Varnish and your CDN keep serving.</p>
+      </div>
+      <div class="stat reveal">
+        <div class="n">Parallel</div>
+        <h3>Frames stop serializing</h3>
+        <p>With no session lock, concurrent requests stop queuing behind each other — several lazy Turbo Frames can finally load at once.</p>
+      </div>
+      <div class="stat reveal">
+        <div class="n">Stateless</div>
+        <h3>Stateless stays stateless</h3>
+        <p>No session cookie is created just to show a notification, and that was the last thing still opening one.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- transports -->
+<section class="band band--tint">
+  <div class="wrap">
+    <p class="eyebrow reveal">Two transports, no session</p>
+    <h2 class="head reveal">The toast leaves the session by one of two doors.</h2>
+    <p class="lead reveal">Which one depends only on what your controller returns — a Turbo Stream, or a full-page redirect.</p>
+
+    <div class="cards2">
+      <div class="tcard tcard--stream reveal">
+        <span class="tcard__badge">Turbo Stream</span>
+        <h3>Rendered in the same response</h3>
+        <p>For Turbo and AJAX flows. The toast is generated and rendered inside the very response you return, appended to the DOM, then auto-dismissed by a small Stimulus controller. No redirect, no storage at all.</p>
+        <div class="mini"><span class="kw">return</span> <span class="var">$this</span>-&gt;<span class="fn">toast</span>(<span class="str">'Item saved'</span>);</div>
+      </div>
+      <div class="tcard tcard--cookie reveal">
+        <span class="tcard__badge">Short-lived cookie</span>
+        <h3>Carried across a redirect</h3>
+        <p>For classic full-page redirects. The toast rides a <code>SameSite=Lax</code> cookie, serialized at <code>kernel.response</code> and consumed client-side on the next load. The redirected-to page’s HTML stays generic — and stays cacheable.</p>
+        <div class="mini"><span class="var">$this</span>-&gt;<span class="fn">deferToast</span>(<span class="str">'Welcome back!'</span>);</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- api + demo (dark) -->
+<section class="band band--dark" id="api">
+  <div class="wrap">
+    <p class="eyebrow reveal">The API</p>
+    <h2 class="head reveal">Two verbs. No magic.</h2>
+    <p class="lead reveal">Use the trait in any controller. The verb you pick mirrors the response you return — nothing is inferred behind your back.</p>
+
+    <table class="verbs reveal">
+      <thead><tr><th>You return</th><th>You call</th></tr></thead>
+      <tbody>
+        <tr><td>a Turbo Stream response</td><td><code>toast()</code> &nbsp;/&nbsp; <code>toasts()</code></td></tr>
+        <tr><td>a <code>RedirectResponse</code> (or any full page)</td><td><code>deferToast()</code> before returning</td></tr>
+      </tbody>
+    </table>
+
+    <div class="api-grid" style="margin-top:2.4rem">
+      <div class="reveal">
+        <span class="code-label">Turbo flow — one toast, one line</span>
+<pre class="code"><span class="tok-k">use</span> <span class="tok-v">MarilenaRM\TurboToastBundle\Controller\TurboToastTrait</span>;
+
+<span class="tok-k">final class</span> <span class="tok-f">ItemController</span> <span class="tok-k">extends</span> AbstractController
+{
+    <span class="tok-k">use</span> TurboToastTrait;
+
+    #[<span class="tok-f">Route</span>(<span class="tok-s">'/items'</span>, methods: [<span class="tok-s">'POST'</span>])]
+    <span class="tok-k">public function</span> <span class="tok-f">create</span>(): Response
+    {
+        <span class="tok-c">// … persist</span>
+        <span class="tok-k">return</span> <span class="tok-v">$this</span>-><span class="tok-f">toast</span>(<span class="tok-s">'Item saved'</span>);
+        <span class="tok-c">// or: ->toast('Oops', 'error');</span>
+        <span class="tok-c">// or: ->toast('Coming soon', 'info', delay: 8000);</span>
+    }
+}</pre>
+      </div>
+      <div class="reveal">
+        <span class="code-label">Redirect flow — deferred over a cookie</span>
+<pre class="code">#[<span class="tok-f">Route</span>(<span class="tok-s">'/login'</span>, methods: [<span class="tok-s">'POST'</span>])]
+<span class="tok-k">public function</span> <span class="tok-f">login</span>(): Response
+{
+    <span class="tok-c">// … authenticate</span>
+    <span class="tok-v">$this</span>-><span class="tok-f">deferToast</span>(<span class="tok-s">'Welcome back!'</span>);
+
+    <span class="tok-k">return</span> <span class="tok-v">$this</span>-><span class="tok-f">redirectToRoute</span>(<span class="tok-s">'dashboard'</span>);
+}
+
+<span class="tok-c">// Several at once, any transport:</span>
+<span class="tok-v">$this</span>-><span class="tok-f">toasts</span>(
+    <span class="tok-k">new</span> <span class="tok-f">Toast</span>(<span class="tok-s">'Profile updated'</span>),
+    <span class="tok-k">new</span> <span class="tok-f">Toast</span>(<span class="tok-s">'Email sent'</span>, <span class="tok-s">'info'</span>),
+);</pre>
+      </div>
+    </div>
+
+    <div class="demo" role="group" aria-label="Live toast demo">
+      <span class="demo__hint">▸ A taste — same CSS, same <code>role</code>, dismissed by a click anywhere or by waiting, exactly like the bundle. The <a href="https://github.com/marilenaRM/turbo-toast-demo" target="_blank" rel="noopener">runnable demo app ↗</a> exercises every flow — redirects, custom hooks, profiler:</span>
+      <button class="chip chip--success" type="button" data-toast="success" data-msg="Item saved">Item saved</button>
+      <button class="chip chip--error" type="button" data-toast="error" data-msg="Something went wrong">Something went wrong</button>
+      <button class="chip chip--warning" type="button" data-toast="warning" data-msg="Heads up — check your input">Heads up</button>
+      <button class="chip chip--info" type="button" data-toast="info" data-msg="A confirmation email is on its way">Info</button>
+    </div>
+  </div>
+</section>
+
+<!-- when to use -->
+<section class="band" id="fit">
+  <div class="wrap">
+    <p class="eyebrow reveal">Be honest with your profiler</p>
+    <h2 class="head reveal">This is a scalpel, not a default.</h2>
+    <p class="lead reveal">It only helps where the flash was the <em>last</em> thing forcing a session. Everywhere else, keep <code>addFlash()</code> if you like it.</p>
+
+    <div class="honest">
+      <div class="hcol hcol--yes reveal">
+        <h3>✓ Where it shines</h3>
+        <ul>
+          <li>Anonymous, cacheable pages behind a CDN — catalogs, content sites.</li>
+          <li>Stateless forms using <a href="https://symfony.com/blog/new-in-symfony-7-2-stateless-csrf" target="_blank" rel="noopener">stateless CSRF</a>.</li>
+          <li>Lazy-frame-heavy pages that shouldn’t serialize on a lock.</li>
+          <li>Anywhere a flash was the only reason a session still opened.</li>
+        </ul>
+      </div>
+      <div class="hcol hcol--no reveal">
+        <h3>✗ Where it gains you nothing</h3>
+        <ul>
+          <li>Authenticated pages — the firewall loads the token from the session anyway.</li>
+          <li>Classic session-based CSRF protection.</li>
+          <li>Locale, cart, or anything else already living in the session.</li>
+          <li>The session opens regardless, so removing flashes buys you nothing.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note-line reveal">Profile first (in Blackfire, look for <code>session_start</code> and serialized concurrent requests), then decide.</p>
+  </div>
+</section>
+
+<!-- features -->
+<section class="band band--tint">
+  <div class="wrap">
+    <p class="eyebrow reveal">In the box</p>
+    <h2 class="head reveal">Built like production infrastructure.</h2>
+
+    <div class="feat">
+      <div class="fcard reveal"><span class="ic">📊</span><h3>Profiler panel</h3><p>Every toast emitted per request, per transport, with queued / transported / discarded counts. Zero overhead outside debug.</p></div>
+      <div class="fcard reveal"><span class="ic">♿</span><h3>Accessible</h3><p>The <code>aria-live="polite"</code> container survives Turbo Drive. Error toasts render <code>role="alert"</code> (interrupting); every other type gets <code>role="status"</code>.</p></div>
+      <div class="fcard reveal"><span class="ic">🛡️</span><h3>XSS-safe by default</h3><p>Cookie text is rendered with <code>textContent</code> only and treated as untrusted — no markup ever executes.</p></div>
+      <div class="fcard reveal"><span class="ic">🧩</span><h3>Composable streams</h3><p>Include the toast partial in your own <code>*.stream.html.twig</code> — append a row <em>and</em> notify in one response.</p></div>
+      <div class="fcard reveal"><span class="ic">⚙️</span><h3>No config drift</h3><p>DOM id, cookie name and Stimulus identifiers are injected from PHP into the markup, so YAML and JS can’t diverge.</p></div>
+      <div class="fcard reveal"><span class="ic">🎨</span><h3>Own the rendering</h3><p>Swap the template target, or cancel the <code>append</code> event to hand rendering to your own toast library.</p></div>
+      <div class="fcard reveal"><span class="ic">🚫</span><h3>5xx-safe cookie</h3><p>A request that ended in a server error discards its queued toasts — no false “success” on the next page.</p></div>
+      <div class="fcard reveal"><span class="ic">✅</span><h3>Tested & hardened</h3><p>PHPUnit + Vitest suites, CI on PHP 8.3 & 8.4, and a documented threat model behind every protection.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- install -->
+<section class="band" id="install">
+  <div class="wrap">
+    <div class="split">
+      <div class="reveal">
+        <p class="eyebrow">Get started</p>
+        <h2 class="head">Four steps<br>to no session.</h2>
+        <p class="lead">Symfony Flex registers the bundle for you. The rest is one Twig call and, if you like, one CSS import.</p>
+      </div>
+      <div class="reveal">
+        <div class="steps">
+          <div class="step"><div class="step__n"></div><div class="step__b"><h3>Require the package</h3>
+<pre class="code"><span class="tok-v">composer</span> require marilenarm/turbo-toast-bundle</pre></div></div>
+          <div class="step"><div class="step__n"></div><div class="step__b"><h3>Register the bundle</h3><p>Automatic with Flex. Otherwise add it to <code>config/bundles.php</code>.</p></div></div>
+          <div class="step"><div class="step__n"></div><div class="step__b"><h3>Drop the container in your layout</h3>
+<pre class="code"><span class="tok-c">{# templates/base.html.twig, inside &lt;body&gt; #}</span>
+{{ <span class="tok-f">turbo_toast_container</span>() }}</pre></div></div>
+          <div class="step"><div class="step__n"></div><div class="step__b"><h3>Import the styles <span style="font-weight:400;color:var(--muted)">(optional)</span></h3>
+<pre class="code"><span class="tok-c">/* assets/styles/app.css */</span>
+<span class="tok-k">@import</span> <span class="tok-s">'~@marilenarm/turbo-toast/styles/toast.css'</span>;</pre></div></div>
+        </div>
+
+        <span class="code-label" style="color:var(--muted); margin-top:2rem">Configuration — every value has a sane default</span>
+<pre class="code" style="background:#0c1728"><span class="tok-c"># config/packages/marilena_rm_turbo_toast.yaml</span>
+<span class="tok-a">marilena_rm_turbo_toast</span>:
+    <span class="tok-a">target</span>: toasts            <span class="tok-c"># DOM id of the container</span>
+    <span class="tok-a">default_delay</span>: <span class="tok-s">5000</span>       <span class="tok-c"># auto-dismiss (ms), 0 to disable</span>
+    <span class="tok-a">cookie_name</span>: turbo_toast   <span class="tok-c"># cookie used by deferToast()</span>
+    <span class="tok-a">controller_name</span>: marilenarm/turbo-toast/toast
+    <span class="tok-a">stream_template</span>: <span class="tok-s">'@MarilenaRMTurboToast/toast.stream.html.twig'</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- footer -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div>
+        <a class="brand" href="#top" style="font-size:1.05rem"><span class="glyph">🍞</span><b>turbo-toast</b><span class="crumb">/ bundle</span></a>
+        <p>Session-free flash notifications for Symfony. The notification travels next to the page, not inside it.</p>
+        <div class="kofi">If it saved your pages from the session lock, <a href="https://ko-fi.com/marilenarm" target="_blank" rel="noopener">buy me a coffee ☕</a></div>
+      </div>
+      <div class="foot__links">
+        <a href="https://github.com/marilenaRM/turbo-toast-bundle" target="_blank" rel="noopener">GitHub ↗</a>
+        <a href="https://packagist.org/packages/marilenarm/turbo-toast-bundle" target="_blank" rel="noopener">Packagist ↗</a>
+        <a href="https://github.com/marilenaRM/turbo-toast-demo" target="_blank" rel="noopener">Demo app ↗</a>
+        <a href="https://github.com/marilenaRM/turbo-toast-bundle/blob/main/docs/hardening.md" target="_blank" rel="noopener">Hardening notes ↗</a>
+        <a href="https://ko-fi.com/marilenarm" target="_blank" rel="noopener">Ko-fi ↗</a>
+      </div>
+    </div>
+    <div class="foot__bottom">
+      <span>MIT License · Built by Marilena Ruffelaere</span>
+      <span>PHP 8.3+ · Symfony 7.x · UX Turbo + Stimulus</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var region = document.getElementById('toasts');
+
+  function spawn(message, type, delay){
+    type = type || 'success';
+    delay = delay == null ? 5000 : delay;
+    var el = document.createElement('div');
+    el.className = 'toast toast--' + type;
+    el.setAttribute('role', type === 'error' ? 'alert' : 'status');  // error interrupts, others polite — as the bundle does
+    el.textContent = message;                // textContent only, dismiss on click anywhere — matches the bundle
+    region.appendChild(el);
+    // force reflow so the transition plays, then slide in
+    void el.offsetWidth;
+    el.classList.add('toast--in');
+    var timer;
+    function dismiss(){
+      clearTimeout(timer);
+      el.classList.remove('toast--in');
+      var gone = false;
+      var finish = function(){ if(gone) return; gone = true; el.remove(); };
+      el.addEventListener('transitionend', finish, {once:true});
+      setTimeout(finish, 400);               // fallback if no transition fires
+    }
+    el.addEventListener('click', dismiss);
+    if(delay > 0){ timer = setTimeout(dismiss, delay); }
+  }
+
+  // demo buttons
+  document.querySelectorAll('[data-toast]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      spawn(btn.getAttribute('data-msg'), btn.getAttribute('data-toast'), 5000);
+    });
+  });
+
+  // copy install command — dogfood the toast
+  var copyBtn = document.getElementById('copyBtn');
+  if(copyBtn){
+    copyBtn.addEventListener('click', function(){
+      var cmd = 'composer require marilenarm/turbo-toast-bundle';
+      var done = function(){ copyBtn.textContent = 'copied'; spawn('Copied to clipboard', 'success', 2500);
+        setTimeout(function(){ copyBtn.textContent = 'copy'; }, 1600); };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(cmd).then(done, done);
+      } else { done(); }
+    });
+  }
+
+  // scroll reveal
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var items = document.querySelectorAll('.reveal');
+  if(reduce || !('IntersectionObserver' in window)){
+    items.forEach(function(el){ el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, {threshold:0.12, rootMargin:'0px 0px -40px 0px'});
+    items.forEach(function(el){ io.observe(el); });
+  }
+
+  // one welcome toast on load — teaches the value prop, dismissable
+  window.addEventListener('load', function(){
+    setTimeout(function(){ spawn('No session was opened to render this page.', 'info', 6000); }, 700);
+  });
+})();
+</script>
+</body>
+</html>

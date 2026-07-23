@@ -1,6 +1,7 @@
 {
     "name": "marilenarm/turbo-toast-bundle",
     "description": "Session-free flash/toast notifications for Symfony that keep your pages HTTP-cacheable, via Turbo Streams and a cookie transport.",
+    "homepage": "https://marilenarm.github.io/turbo-toast-bundle/",
     "keywords": ["symfony", "bundle", "turbo", "stimulus", "toast", "flash", "notifications", "hotwire", "http-cache", "stateless"],
     "type": "symfony-bundle",
     "license": "MIT",
@@ -11,6 +12,11 @@
             "homepage": "https://github.com/marilenaRM"
         }
     ],
+    "support": {
+        "issues": "https://github.com/marilenaRM/turbo-toast-bundle/issues",
+        "source": "https://github.com/marilenaRM/turbo-toast-bundle",
+        "docs": "https://marilenarm.github.io/turbo-toast-bundle/"
+    },
     "require": {
         "php": ">=8.3",
         "psr/log": "^3.0",
