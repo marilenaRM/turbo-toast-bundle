@@ -197,6 +197,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
 .demo{margin-top:2rem; border:1px dashed var(--line-d); border-radius:12px; padding:1.3rem;
   display:flex; flex-wrap:wrap; align-items:center; gap:0.7rem; background:rgba(255,255,255,0.02)}
 .demo .demo__hint{font-family:var(--mono); font-size:0.78rem; color:var(--dark-fg-2); width:100%; margin-bottom:0.3rem}
+.demo__hint a{color:#fff; text-decoration:underline; text-underline-offset:2px}
 .chip{border:0; cursor:pointer; font-family:var(--sans); font-weight:600; font-size:0.88rem;
   color:#fff; padding:0.55rem 0.95rem; border-radius:8px; transition:transform .12s, filter .15s;
   display:inline-flex; align-items:center; gap:0.45rem}
@@ -259,12 +260,10 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
   gap:0.5rem; pointer-events:none}
 .toast{pointer-events:auto; min-width:16rem; max-width:24rem; padding:0.75rem 1rem; border-radius:0.375rem;
   color:#fff; background:#334155; box-shadow:0 4px 12px rgb(0 0 0 / 15%); cursor:pointer;
-  opacity:0; transform:translateY(-8px); transition:opacity .2s ease, transform .2s ease;
-  font-size:0.92rem; display:flex; align-items:center; gap:0.55rem}
+  opacity:0; transform:translateY(-8px); transition:opacity .2s ease, transform .2s ease}
 .toast--in{opacity:1; transform:translateY(0)}
 .toast--success{background:#16a34a}.toast--error{background:#dc2626}
 .toast--warning{background:#d97706}.toast--info{background:#2563eb}
-.toast .tclose{margin-left:auto; opacity:0.7; font-size:1.1rem; line-height:1}
 
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
@@ -310,6 +309,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
       <div class="cta-row">
         <a class="btn btn--primary" href="#api">See the API</a>
         <a class="btn btn--ghost" href="https://github.com/marilenaRM/turbo-toast-bundle" target="_blank" rel="noopener">Read the docs ↗</a>
+        <a class="btn btn--ghost" href="https://github.com/marilenaRM/turbo-toast-demo" target="_blank" rel="noopener">Run the demo ↗</a>
       </div>
     </div>
 
@@ -453,7 +453,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
     </div>
 
     <div class="demo" role="group" aria-label="Live toast demo">
-      <span class="demo__hint">▸ These buttons fire the real toasts — top-right, exactly as the bundle renders them:</span>
+      <span class="demo__hint">▸ A taste — same CSS, same <code>role</code>, dismissed by a click anywhere or by waiting, exactly like the bundle. The <a href="https://github.com/marilenaRM/turbo-toast-demo" target="_blank" rel="noopener">runnable demo app ↗</a> exercises every flow — redirects, custom hooks, profiler:</span>
       <button class="chip chip--success" type="button" data-toast="success" data-msg="Item saved">Item saved</button>
       <button class="chip chip--error" type="button" data-toast="error" data-msg="Something went wrong">Something went wrong</button>
       <button class="chip chip--warning" type="button" data-toast="warning" data-msg="Heads up — check your input">Heads up</button>
@@ -501,7 +501,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
 
     <div class="feat">
       <div class="fcard reveal"><span class="ic">📊</span><h3>Profiler panel</h3><p>Every toast emitted per request, per transport, with queued / transported / discarded counts. Zero overhead outside debug.</p></div>
-      <div class="fcard reveal"><span class="ic">♿</span><h3>Accessible</h3><p>Container is <code>aria-live="polite"</code> and <code>data-turbo-permanent</code>, so toasts are announced and survive Turbo Drive.</p></div>
+      <div class="fcard reveal"><span class="ic">♿</span><h3>Accessible</h3><p>The <code>aria-live="polite"</code> container survives Turbo Drive. Error toasts render <code>role="alert"</code> (interrupting); every other type gets <code>role="status"</code>.</p></div>
       <div class="fcard reveal"><span class="ic">🛡️</span><h3>XSS-safe by default</h3><p>Cookie text is rendered with <code>textContent</code> only and treated as untrusted — no markup ever executes.</p></div>
       <div class="fcard reveal"><span class="ic">🧩</span><h3>Composable streams</h3><p>Include the toast partial in your own <code>*.stream.html.twig</code> — append a row <em>and</em> notify in one response.</p></div>
       <div class="fcard reveal"><span class="ic">⚙️</span><h3>No config drift</h3><p>DOM id, cookie name and Stimulus identifiers are injected from PHP into the markup, so YAML and JS can’t diverge.</p></div>
@@ -559,6 +559,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
       <div class="foot__links">
         <a href="https://github.com/marilenaRM/turbo-toast-bundle" target="_blank" rel="noopener">GitHub ↗</a>
         <a href="https://packagist.org/packages/marilenarm/turbo-toast-bundle" target="_blank" rel="noopener">Packagist ↗</a>
+        <a href="https://github.com/marilenaRM/turbo-toast-demo" target="_blank" rel="noopener">Demo app ↗</a>
         <a href="https://github.com/marilenaRM/turbo-toast-bundle/blob/main/docs/hardening.md" target="_blank" rel="noopener">Hardening notes ↗</a>
         <a href="https://ko-fi.com/marilenarm" target="_blank" rel="noopener">Ko-fi ↗</a>
       </div>
@@ -579,12 +580,8 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
     delay = delay == null ? 5000 : delay;
     var el = document.createElement('div');
     el.className = 'toast toast--' + type;
-    var text = document.createElement('span');
-    text.textContent = message;              // textContent only — matches the bundle
-    el.appendChild(text);
-    var x = document.createElement('span');
-    x.className = 'tclose'; x.setAttribute('aria-hidden','true'); x.textContent = '×';
-    el.appendChild(x);
+    el.setAttribute('role', type === 'error' ? 'alert' : 'status');  // error interrupts, others polite — as the bundle does
+    el.textContent = message;                // textContent only, dismiss on click anywhere — matches the bundle
     region.appendChild(el);
     // force reflow so the transition plays, then slide in
     void el.offsetWidth;
