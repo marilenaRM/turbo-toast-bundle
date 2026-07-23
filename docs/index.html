@@ -84,13 +84,13 @@ h2.head{
   color:var(--dark-fg); padding-block:clamp(3.4rem,7vw,5.6rem) clamp(3.6rem,8vw,6rem);
   overflow:hidden}
 .hero__grid{display:grid; grid-template-columns:1.05fr 0.95fr; gap:clamp(2rem,5vw,4rem); align-items:center}
-@media(max-width:860px){.hero__grid{grid-template-columns:1fr; gap:2.6rem}}
+@media(max-width:1000px){.hero__grid{grid-template-columns:1fr; gap:2.6rem}}
 .hero .tagline{font-family:var(--mono); font-size:0.74rem; letter-spacing:0.22em;
   text-transform:uppercase; color:var(--dark-fg-2); margin:0 0 1.3rem;
   display:flex; gap:0.7rem; flex-wrap:wrap; align-items:center}
 .hero .tagline i{font-style:normal; color:var(--ok-2)}
 .hero h1{font-size:clamp(2.5rem,1.4rem + 5vw,4.5rem); font-weight:800; line-height:0.98;
-  letter-spacing:-0.035em; margin:0 0 1.3rem; color:#fff}
+  letter-spacing:-0.035em; margin:0 0 1.3rem; color:#fff; overflow-wrap:break-word}
 .hero h1 .em{color:var(--ok-2); position:relative; white-space:nowrap}
 .hero h1 .em::after{content:""; position:absolute; left:0; right:0; bottom:0.08em; height:0.09em;
   background:var(--ok-2); opacity:0.35; border-radius:2px}
