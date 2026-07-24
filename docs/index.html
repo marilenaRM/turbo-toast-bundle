@@ -11,7 +11,7 @@
 <meta property="og:title" content="TurboToastBundle — flash messages that keep your pages cacheable">
 <meta property="og:description" content="The flash message leaves the PHP session. Anonymous pages stay fast, parallel, and fully cacheable — the notification travels next to the page, not inside it.">
 <meta property="og:url" content="https://marilenarm.github.io/turbo-toast-bundle/">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%9E%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect x='22' y='15' width='34' height='13' rx='6.5' fill='%2364748b'/><rect x='8' y='30' width='46' height='20' rx='9' fill='%23f2a63c'/><rect x='15' y='36' width='28' height='4' rx='2' fill='%230f1729'/><rect x='15' y='43' width='18' height='4' rx='2' fill='%230f1729'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -68,7 +68,7 @@ h2.head{
 @media(max-width:440px){.brand .crumb{display:none}}
 .brand b{color:#fff}
 .brand .crumb{color:var(--ok-2)}
-.brand .glyph{font-size:1.05rem; line-height:1}
+.brand .glyph{width:1.35rem; height:1.35rem; background:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect x='22' y='15' width='34' height='13' rx='6.5' fill='%2364748b'/><rect x='8' y='30' width='46' height='20' rx='9' fill='%23f2a63c'/><rect x='15' y='36' width='28' height='4' rx='2' fill='%230f1729'/><rect x='15' y='43' width='18' height='4' rx='2' fill='%230f1729'/></svg>") center/contain no-repeat}
 .nav__links{display:flex; gap:1.4rem; align-items:center; font-family:var(--mono);
   font-size:0.82rem; color:var(--dark-fg-2)}
 .nav__links a{text-decoration:none; transition:color .15s}
@@ -282,7 +282,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
 <!-- nav -->
 <nav class="nav">
   <div class="wrap nav__in">
-    <a class="brand" href="#top"><span class="glyph">🍞</span><b>turbo-toast</b><span class="crumb">/ bundle</span></a>
+    <a class="brand" href="#top"><span class="glyph" aria-hidden="true"></span><b>turbo-toast</b><span class="crumb">/ bundle</span></a>
     <div class="nav__links">
       <a class="hide-sm" href="#problem">Problem</a>
       <a class="hide-sm" href="#api">API</a>
@@ -552,7 +552,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
   <div class="wrap">
     <div class="foot__grid">
       <div>
-        <a class="brand" href="#top" style="font-size:1.05rem"><span class="glyph">🍞</span><b>turbo-toast</b><span class="crumb">/ bundle</span></a>
+        <a class="brand" href="#top" style="font-size:1.05rem"><span class="glyph" aria-hidden="true"></span><b>turbo-toast</b><span class="crumb">/ bundle</span></a>
         <p>Session-free flash notifications for Symfony. The notification travels next to the page, not inside it.</p>
         <div class="kofi">If it saved your pages from the session lock, <a href="https://ko-fi.com/marilenarm" target="_blank" rel="noopener">buy me a coffee ☕</a></div>
       </div>
