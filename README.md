@@ -48,8 +48,20 @@ requests), then decide.
 
 ## Requirements
 
-- PHP >= 8.3, Symfony 7.x
+- PHP >= 8.3, Symfony 6.4 (LTS), 7.x or 8.x
 - `symfony/ux-turbo` and `symfony/stimulus-bundle`
+
+Symfony 8 itself requires PHP >= 8.4.1, so that pairing rules out PHP 8.3.
+
+The pairings CI actually runs are listed in `MATRIX` (see
+[Contributing](#contributing)): a sparse grid hitting both ends of the PHP range
+each Symfony branch supports, plus a `--prefer-lowest` run resolving the oldest
+dependency set the constraints allow.
+
+Symfony 7.0–7.3 are accepted by the version constraint — nothing in the bundle
+needs a newer API — but they are not tested: those branches are end-of-life and
+carry unpatched security advisories, so Composer refuses to install them by
+default.
 
 ## Installation
 
@@ -242,6 +254,31 @@ marilena_rm_turbo_toast:
     stream_template: '@MarilenaRMTurboToast/toast.stream.html.twig'
     cookie_name: turbo_toast  # cookie used by deferToast() across redirects
 ```
+
+## Contributing
+
+The test pipeline runs in [Dagger](https://dagger.io), so the matrix you run on
+your laptop is the one CI runs — no "works on my machine" gap, and no Symfony
+version list duplicated in a workflow file. With the Dagger CLI and a container
+runtime installed:
+
+```bash
+dagger call ci                              # everything CI runs
+dagger call matrix                          # the PHP / Symfony matrix
+dagger call test --php=8.3 --symfony='6.4.*' --prefer-lowest  # a single cell
+dagger call lint                            # Twig lint
+dagger call assets                          # dist sync + Stimulus tests
+```
+
+The tested combinations live in `MATRIX`, in
+[`.dagger/src/turbo_toast/main.py`](.dagger/src/turbo_toast/main.py). Each cell
+pins Symfony through `symfony/flex` and then asserts that a transitive package
+really landed on the branch under test, so a cell cannot go green while quietly
+resolving a newer Symfony.
+
+Widening the supported range means editing `composer.json`, adding a row to
+`MATRIX`, and updating the Requirements section above plus the version strings
+in `docs/index.html` (`grep -n 'Symfony 6.4' docs/index.html` finds them).
 
 ---
 
