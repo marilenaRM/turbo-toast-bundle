@@ -1,0 +1,33 @@
+name: Install Dagger CLI
+description: Install the Dagger CLI pinned by dagger.json, verifying the release archive.
+
+runs:
+    using: composite
+    steps:
+        # The upstream one-liner is `curl https://dl.dagger.io/... | sh`, which runs
+        # whatever that host serves at the time — including the binary it then fetches.
+        # Downloading the release archive and checking it against the hash below pins
+        # the bytes instead. CHECKSUM carries the file name, and the file name carries
+        # the version, so bumping dagger.json without updating this hash fails here
+        # instead of silently installing an unverified CLI.
+        - shell: bash
+          env:
+              CHECKSUM: cc993d3a3625501dab1bc521aedb84dce53e2dba337f9913e14a9b3ead1686af  dagger_v0.20.7_linux_amd64.tar.gz
+          run: |
+              set -euo pipefail
+
+              # `jq -r .engineVersion` would print the string "null" for a missing
+              # key and fail later as an opaque 404; name the real problem here.
+              version="$(jq -er '.engineVersion // error("engineVersion missing")' dagger.json)"
+              archive="dagger_${version}_linux_amd64.tar.gz"
+
+              curl -fsSL -o "$archive" \
+                  "https://github.com/dagger/dagger/releases/download/${version}/${archive}"
+              printf '%s\n' "$CHECKSUM" | sha256sum -c -
+
+              mkdir -p "${RUNNER_TEMP}/dagger-bin"
+              tar -xzf "$archive" -C "${RUNNER_TEMP}/dagger-bin" dagger
+              rm "$archive"
+
+              echo "${RUNNER_TEMP}/dagger-bin" >> "$GITHUB_PATH"
+              "${RUNNER_TEMP}/dagger-bin/dagger" version

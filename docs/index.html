@@ -297,7 +297,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
 <header class="hero" id="top">
   <div class="wrap hero__grid">
     <div>
-      <p class="tagline"><i>◆</i> Symfony&nbsp;7 bundle <span>·</span> PHP&nbsp;8.3+ <span>·</span> MIT</p>
+      <p class="tagline"><i>◆</i> Symfony&nbsp;6.4 / 7 / 8 bundle <span>·</span> PHP&nbsp;8.3+ <span>·</span> MIT</p>
       <h1>Flash messages that keep your pages<br><span class="em">cacheable</span>.</h1>
       <p class="sub"><code>$this-&gt;addFlash()</code> quietly opens the PHP session — and a page that touches the session can never be stored by Varnish or your CDN. This bundle takes the toast out of the session, so anonymous pages stay fast, parallel, and fully cacheable.</p>
 
@@ -507,7 +507,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
       <div class="fcard reveal"><span class="ic">⚙️</span><h3>No config drift</h3><p>DOM id, cookie name and Stimulus identifiers are injected from PHP into the markup, so YAML and JS can’t diverge.</p></div>
       <div class="fcard reveal"><span class="ic">🎨</span><h3>Own the rendering</h3><p>Swap the template target, or cancel the <code>append</code> event to hand rendering to your own toast library.</p></div>
       <div class="fcard reveal"><span class="ic">🚫</span><h3>5xx-safe cookie</h3><p>A request that ended in a server error discards its queued toasts — no false “success” on the next page.</p></div>
-      <div class="fcard reveal"><span class="ic">✅</span><h3>Tested & hardened</h3><p>PHPUnit + Vitest suites, CI on PHP 8.3 & 8.4, and a documented threat model behind every protection.</p></div>
+      <div class="fcard reveal"><span class="ic">✅</span><h3>Tested & hardened</h3><p>PHPUnit + Vitest suites, CI on Symfony 6.4, 7.4 and 8.x across PHP 8.3 to 8.5, and a documented threat model behind every protection.</p></div>
     </div>
   </div>
 </section>
@@ -566,7 +566,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
     </div>
     <div class="foot__bottom">
       <span>MIT License · Built by Marilena Ruffelaere</span>
-      <span>PHP 8.3+ · Symfony 7.x · UX Turbo + Stimulus</span>
+      <span>PHP 8.3+ · Symfony 6.4 / 7.x / 8.x · UX Turbo + Stimulus</span>
     </div>
   </div>
 </footer>

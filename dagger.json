@@ -1,0 +1,8 @@
+{
+  "name": "turbo-toast",
+  "engineVersion": "v0.20.7",
+  "sdk": {
+    "source": "python"
+  },
+  "source": ".dagger"
+}
