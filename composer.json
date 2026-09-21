@@ -26,8 +26,8 @@
         "symfony/http-foundation": "^6.4 || ^7.0 || ^8.0",
         "symfony/http-kernel": "^6.4 || ^7.0 || ^8.0",
         "symfony/service-contracts": "^3.5",
-        "symfony/stimulus-bundle": "^2.13",
-        "symfony/ux-turbo": "^2.13",
+        "symfony/stimulus-bundle": "^2.13 || ^3.0",
+        "symfony/ux-turbo": "^2.13 || ^3.0",
         "twig/twig": "^3.0"
     },
     "require-dev": {
