@@ -49,9 +49,11 @@ requests), then decide.
 ## Requirements
 
 - PHP >= 8.3, Symfony 6.4 (LTS), 7.x or 8.x
-- `symfony/ux-turbo` and `symfony/stimulus-bundle`
+- `symfony/ux-turbo` and `symfony/stimulus-bundle`, UX 2.13+ or UX 3.x
 
-Symfony 8 itself requires PHP >= 8.4.1, so that pairing rules out PHP 8.3.
+Symfony 8 itself requires PHP >= 8.4.1, so that pairing rules out PHP 8.3. The
+same goes for UX 3, which requires PHP >= 8.4: on PHP 8.3, Composer keeps you
+on UX 2.
 
 The pairings CI actually runs are listed in `MATRIX` (see
 [Contributing](#contributing)): a sparse grid hitting both ends of the PHP range
@@ -265,16 +267,17 @@ runtime installed:
 ```bash
 dagger call ci                              # everything CI runs
 dagger call matrix                          # the PHP / Symfony matrix
-dagger call test --php=8.3 --symfony='6.4.*' --prefer-lowest  # a single cell
+dagger call test --php=8.3 --symfony='6.4.*' --ux=2 --prefer-lowest  # a single cell
 dagger call lint                            # Twig lint
 dagger call assets                          # dist sync + Stimulus tests
 ```
 
 The tested combinations live in `MATRIX`, in
 [`.dagger/src/turbo_toast/main.py`](.dagger/src/turbo_toast/main.py). Each cell
-pins Symfony through `symfony/flex` and then asserts that a transitive package
-really landed on the branch under test, so a cell cannot go green while quietly
-resolving a newer Symfony.
+pins Symfony through `symfony/flex` and the UX major through `composer update
+--with`, then asserts that both really landed on the versions under test, so a
+cell cannot go green while quietly resolving a newer Symfony or the other UX
+major.
 
 Widening the supported range means editing `composer.json`, adding a row to
 `MATRIX`, and updating the Requirements section above plus the version strings
