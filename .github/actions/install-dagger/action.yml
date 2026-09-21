@@ -12,7 +12,7 @@ runs:
         # instead of silently installing an unverified CLI.
         - shell: bash
           env:
-              CHECKSUM: cc993d3a3625501dab1bc521aedb84dce53e2dba337f9913e14a9b3ead1686af  dagger_v0.20.7_linux_amd64.tar.gz
+              CHECKSUM: 33eea0b08d6be444bada18e64b2216459100d6070abcb4b5345cee40c9fff982  dagger_v0.21.9_linux_amd64.tar.gz
           run: |
               set -euo pipefail
 
