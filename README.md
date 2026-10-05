@@ -2,32 +2,31 @@
 
 **Flash messages that keep your pages HTTP-cacheable.**
 
-[**Live overview →**](https://marilenarm.github.io/turbo-toast-bundle/) · [**Runnable demo app →**](https://marilenarm.github.io/turbo-toast-demo/) — session-free flows you can click through.
+[**Live overview →**](https://marilenarm.github.io/turbo-toast-bundle/) · [**Runnable demo app →**](https://marilenarm.github.io/turbo-toast-demo/), where you can click through every session-free flow.
 
-A page that touches the session cannot be stored by a shared HTTP cache — Symfony
-marks it `private`, and Varnish or your CDN will never serve it. The classic
-`$this->addFlash()` does exactly that: it drags the session (and its lock) into
-otherwise stateless pages, just to display "Item saved". One flash message and
-your anonymous, perfectly cacheable page becomes uncacheable.
+A page that touches the session cannot be stored by a shared HTTP cache: Symfony
+marks it `private`, so Varnish or your CDN will never serve it. The classic
+`$this->addFlash()` does exactly that. It drags the session (and its lock) into
+otherwise stateless pages just to display "Item saved", and your anonymous page
+stops being cacheable because of a one-line notification.
 
 This bundle takes the flash out of the session entirely, with two transports:
 
 - **Turbo Stream** (AJAX/Turbo flows): the toast is generated and rendered in the
-  same response, appended to the DOM, then auto-dismissed by a small **Stimulus**
-  controller. No redirect, no storage at all.
+  same response, appended to the DOM, then auto-dismissed by a small Stimulus
+  controller. There is no redirect and nothing gets stored.
 - **Short-lived cookie** (classic full-page redirects): deferred toasts are
-  serialized into a cookie at `kernel.response` time and consumed client-side by
-  the container's Stimulus controller on the next page load. The redirected-to
-  page's HTML stays generic — **and stays cacheable**.
+  serialized into a cookie at `kernel.response` time, and the container's
+  Stimulus controller reads them client-side on the next page load. The page you
+  redirect to keeps generic HTML, so it stays cacheable.
 
-What you get on session-free pages:
+On pages that no longer open a session, three things change:
 
-- **Full-page caching** behind Varnish/CDN keeps working, flash messages included —
-  the message travels next to the page (cookie), not inside it.
-- **Real parallelism**: concurrent requests (e.g. several lazy Turbo Frames) no
-  longer serialize on the PHP session lock.
-- **Stateless routes stay stateless**: no session cookie is ever created just to
-  show a notification.
+- Full-page caching behind Varnish or a CDN keeps working with flash messages,
+  because the message travels in a cookie next to the page instead of inside it.
+- Concurrent requests (several lazy Turbo Frames, for instance) stop queuing
+  behind the PHP session lock.
+- No session cookie is ever created just to show a notification.
 
 ## When (not) to use it
 
@@ -36,12 +35,12 @@ per request, *whatever* opens the session:
 
 - **Authenticated pages** (firewall loads the token from the session), classic
   session-based CSRF, locale or cart in session: the session opens anyway, so
-  removing flashes from it gains you **nothing** — keep `addFlash()` there if you
-  like it.
+  removing flashes from it gains you nothing. Keep `addFlash()` there if you like
+  it.
 - **Anonymous, cacheable pages** (catalogs, content sites behind a CDN, stateless
   forms with [stateless CSRF](https://symfony.com/blog/new-in-symfony-7-2-stateless-csrf),
-  lazy-frame-heavy pages): this is where the bundle shines — flashes were the last
-  thing forcing a session, and now nothing does.
+  lazy-frame-heavy pages): this is where the bundle pays off, as long as flashes
+  were the last thing forcing a session open.
 
 Profile first (Blackfire: look for `session_start` and serialized concurrent
 requests), then decide.
@@ -60,9 +59,9 @@ The pairings CI actually runs are listed in `MATRIX` (see
 each Symfony branch supports, plus a `--prefer-lowest` run resolving the oldest
 dependency set the constraints allow.
 
-Symfony 7.0–7.3 are accepted by the version constraint — nothing in the bundle
-needs a newer API — but they are not tested: those branches are end-of-life and
-carry unpatched security advisories, so Composer refuses to install them by
+Symfony 7.0–7.3 are accepted by the version constraint, since nothing in the
+bundle needs a newer API, but they are not tested: those branches are end-of-life
+and carry unpatched security advisories, so Composer refuses to install them by
 default.
 
 ## Installation
@@ -88,8 +87,8 @@ Add the toast container to your base layout:
 {{ turbo_toast_container() }}
 ```
 
-The function renders the container div from the bundle configuration — DOM id,
-cookie name and Stimulus identifiers are injected from PHP, so YAML changes can
+The function renders the container div from the bundle configuration. DOM id,
+cookie name and Stimulus identifiers are injected from PHP, so a YAML change can
 never drift apart from the JS side. The rendered markup is `data-turbo-permanent`
 (existing toasts survive Turbo Drive navigations) and `aria-live="polite"`
 (inserted toasts are announced by screen readers).
@@ -101,7 +100,7 @@ never drift apart from the JS side. The rendered markup is `data-turbo-permanent
 > container markup, write the div manually and keep its Stimulus values in sync
 > with the bundle configuration yourself.
 
-Import the styles (optional — override freely):
+Import the styles if you want them (they are meant to be overridden):
 
 ```css
 /* assets/styles/app.css */
@@ -142,8 +141,8 @@ return $this->toasts(
 );
 ```
 
-Compose the toast with other streams (append a row **and** notify) by including the
-partial in your own `*.stream.html.twig`:
+To append a row *and* notify in the same response, include the toast partial in
+your own `*.stream.html.twig`:
 
 ```twig
 <turbo-stream action="append" target="items">
@@ -162,8 +161,8 @@ Not in a controller? Inject `MarilenaRM\TurboToastBundle\Toast\ToastRenderer` an
 
 When a flow performs a full-page `RedirectResponse` (post-login redirect, OAuth or
 payment callbacks, `data-turbo="false"` links, locale switch...), there is no Turbo
-Stream to render. Use `deferToast()` instead: the toast is transported by a
-short-lived cookie and displayed on the next page load — still no session.
+Stream to render. Use `deferToast()` instead: a short-lived cookie carries the
+toast to the next page load, still without touching the session.
 
 ```php
 #[Route('/login', methods: ['POST'])]
@@ -177,7 +176,7 @@ public function login(): Response
 }
 ```
 
-Two explicit verbs, no magic:
+The verb follows what your controller returns, nothing is guessed:
 
 | You return | Use |
 |---|---|
@@ -185,27 +184,27 @@ Two explicit verbs, no magic:
 | a `RedirectResponse` (or any full page) | `deferToast()` before returning |
 
 `toast()` throws a `LogicException` when the current request does not accept
-Turbo Streams (no `text/vnd.turbo-stream.html` in the `Accept` header) — a
+Turbo Streams (no `text/vnd.turbo-stream.html` in the `Accept` header), because a
 stream rendered there would reach the browser as raw markup. Turbo forms send
 that header automatically; for anything else, use `deferToast()`.
 
 How the cookie transport behaves:
 
 - serialized at `kernel.response` by `ToastCookieSubscriber` (`SameSite=Lax`,
-  `Secure` on HTTPS, not `HttpOnly` — the JS must read it); the response is
+  `Secure` on HTTPS, not `HttpOnly` since the JS must read it); the response is
   forced `private` so the `Set-Cookie` never enters a shared HTTP cache;
-- consumed and **cleared before rendering** by the `toast-container` controller
+- consumed and cleared *before* rendering by the `toast-container` controller
   (initial load, every `turbo:load`, and non-Turbo navigations), so Turbo cache
   restores never replay a toast;
-- rendered with `textContent` only — the cookie is client-modifiable, treat it as
-  untrusted display text and never put sensitive data in it;
+- rendered with `textContent` only: the client can modify the cookie, so treat
+  its content as untrusted display text and never put sensitive data in it;
 - capped at ~3.8 KB url-encoded; trailing toasts beyond the budget are dropped;
 - never set on 5xx responses: a request that ended in a server error discards
   its queued toasts instead of promising success on the next page.
 
-Each of these addresses a concrete failure scenario — see the
-[security & hardening design notes](docs/hardening.md) for the full threat
-model and the reasoning behind every protection.
+Each rule answers a concrete failure scenario. The
+[security & hardening design notes](docs/hardening.md) walk through the threat
+model and explain why every protection is there.
 
 ### Customizing cookie-rendered toasts
 
@@ -242,8 +241,8 @@ document.addEventListener('marilenarm--turbo-toast--toast-container:append', (ev
 
 In debug mode, a **Turbo Toast** panel appears in the Symfony profiler: every
 toast emitted during the request, per transport (Turbo Stream / cookie), with
-the queued / transported / discarded counts for the cookie path. Zero overhead
-outside `kernel.debug` — the traceable decorators are only wired there.
+the queued / transported / discarded counts for the cookie path. The traceable
+decorators are only wired under `kernel.debug`, so production pays nothing.
 
 ## Configuration
 
@@ -260,8 +259,8 @@ marilena_rm_turbo_toast:
 ## Contributing
 
 The test pipeline runs in [Dagger](https://dagger.io), so the matrix you run on
-your laptop is the one CI runs — no "works on my machine" gap, and no Symfony
-version list duplicated in a workflow file. With the Dagger CLI and a container
+your laptop is the one CI runs. That closes the "works on my machine" gap, and the
+Symfony version list is not duplicated in a workflow file. With the Dagger CLI and a container
 runtime installed:
 
 ```bash
