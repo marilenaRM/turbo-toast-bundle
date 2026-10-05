@@ -330,7 +330,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
         </div>
 
         <div class="iblock iblock--good">
-          <div class="cap">with <code>$this-&gt;toast('Item saved')</code></div>
+          <div class="cap">with Turbo Toast</div>
           <div class="hline hline--good"><span class="k">cache-control:</span> <span class="v">public, s-maxage=3600</span></div>
           <div class="hline hline--good"><span class="k">— no set-cookie, no session</span></div>
           <div class="verdict verdict--good">✓ served straight from the CDN</div>
@@ -418,6 +418,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
       <div class="reveal">
         <span class="code-label">Turbo flow — one toast, one line</span>
 <pre class="code"><span class="tok-k">use</span> <span class="tok-v">MarilenaRM\TurboToastBundle\Controller\TurboToastTrait</span>;
+<span class="tok-k">use</span> <span class="tok-v">MarilenaRM\TurboToastBundle\Toast\Toast</span>;
 
 <span class="tok-k">final class</span> <span class="tok-f">ItemController</span> <span class="tok-k">extends</span> AbstractController
 {
@@ -430,6 +431,8 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
         <span class="tok-k">return</span> <span class="tok-v">$this</span>-><span class="tok-f">toast</span>(<span class="tok-s">'Item saved'</span>);
         <span class="tok-c">// or: ->toast('Oops', 'error');</span>
         <span class="tok-c">// or: ->toast('Coming soon', 'info', delay: 8000);</span>
+        <span class="tok-c">// or several in one stream:</span>
+        <span class="tok-c">// ->toasts(new Toast('Saved'), new Toast('Email sent', 'info'));</span>
     }
 }</pre>
       </div>
@@ -444,11 +447,8 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
     <span class="tok-k">return</span> <span class="tok-v">$this</span>-><span class="tok-f">redirectToRoute</span>(<span class="tok-s">'dashboard'</span>);
 }
 
-<span class="tok-c">// Several at once, any transport:</span>
-<span class="tok-v">$this</span>-><span class="tok-f">toasts</span>(
-    <span class="tok-k">new</span> <span class="tok-f">Toast</span>(<span class="tok-s">'Profile updated'</span>),
-    <span class="tok-k">new</span> <span class="tok-f">Toast</span>(<span class="tok-s">'Email sent'</span>, <span class="tok-s">'info'</span>),
-);</pre>
+<span class="tok-c">// Several at once: one deferToast() call per toast,</span>
+<span class="tok-c">// all carried by the same cookie.</span></pre>
       </div>
     </div>
 
@@ -474,7 +474,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
         <h3>✓ Where it shines</h3>
         <ul>
           <li>Anonymous, cacheable pages behind a CDN, such as catalogs or content sites.</li>
-          <li>Stateless forms using <a href="https://symfony.com/blog/new-in-symfony-7-2-stateless-csrf" target="_blank" rel="noopener">stateless CSRF</a>.</li>
+          <li>Stateless forms using <a href="https://symfony.com/blog/new-in-symfony-7-2-stateless-csrf" target="_blank" rel="noopener">stateless CSRF</a> (Symfony 7.2+).</li>
           <li>Lazy-frame-heavy pages that shouldn’t serialize on a lock.</li>
         </ul>
       </div>
@@ -498,7 +498,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
     <h2 class="head reveal">The edge cases are already handled.</h2>
 
     <div class="feat">
-      <div class="fcard reveal"><span class="ic">📊</span><h3>Profiler panel</h3><p>Every toast emitted per request, per transport, with queued / transported / discarded counts. Zero overhead outside debug.</p></div>
+      <div class="fcard reveal"><span class="ic">📊</span><h3>Profiler panel</h3><p>Every toast emitted per request, per transport, with queued / transported / discarded counts. It is only wired in debug, so production doesn’t pay for it.</p></div>
       <div class="fcard reveal"><span class="ic">♿</span><h3>Accessible</h3><p>The <code>aria-live="polite"</code> container survives Turbo Drive. Error toasts render <code>role="alert"</code> (interrupting); every other type gets <code>role="status"</code>.</p></div>
       <div class="fcard reveal"><span class="ic">🛡️</span><h3>XSS-safe by default</h3><p>Cookie text is treated as untrusted and rendered with <code>textContent</code> only, so no markup in it ever executes.</p></div>
       <div class="fcard reveal"><span class="ic">🧩</span><h3>Composable streams</h3><p>Include the toast partial in your own <code>*.stream.html.twig</code> to append a row <em>and</em> notify in one response.</p></div>
