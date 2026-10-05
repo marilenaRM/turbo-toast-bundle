@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TurboToastBundle — flash messages that keep your pages cacheable</title>
-<meta name="description" content="Session-free flash notifications for Symfony. Keep anonymous pages HTTP-cacheable behind Varnish or a CDN — toasts travel via Turbo Streams or a short-lived cookie, never the session.">
+<meta name="description" content="Session-free flash notifications for Symfony. Keep anonymous pages HTTP-cacheable behind Varnish or a CDN: toasts travel via Turbo Streams or a short-lived cookie, never the session.">
 <meta name="author" content="Marilena Ruffelaere">
 <meta name="theme-color" content="#0f172a">
 <meta property="og:type" content="website">
 <meta property="og:title" content="TurboToastBundle — flash messages that keep your pages cacheable">
-<meta property="og:description" content="The flash message leaves the PHP session. Anonymous pages stay fast, parallel, and fully cacheable — the notification travels next to the page, not inside it.">
+<meta property="og:description" content="Flash messages without the PHP session, so anonymous pages stay cacheable behind Varnish or a CDN and lazy Turbo Frames load in parallel.">
 <meta property="og:url" content="https://marilenarm.github.io/turbo-toast-bundle/">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect x='22' y='15' width='34' height='13' rx='6.5' fill='%2364748b'/><rect x='8' y='30' width='46' height='20' rx='9' fill='%23f2a63c'/><rect x='15' y='36' width='28' height='4' rx='2' fill='%230f1729'/><rect x='15' y='43' width='18' height='4' rx='2' fill='%230f1729'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -299,7 +299,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
     <div>
       <p class="tagline"><i>◆</i> Symfony&nbsp;6.4 / 7 / 8 bundle <span>·</span> PHP&nbsp;8.3+ <span>·</span> MIT</p>
       <h1>Flash messages that keep your pages<br><span class="em">cacheable</span>.</h1>
-      <p class="sub"><code>$this-&gt;addFlash()</code> quietly opens the PHP session — and a page that touches the session can never be stored by Varnish or your CDN. This bundle takes the toast out of the session, so anonymous pages stay fast, parallel, and fully cacheable.</p>
+      <p class="sub"><code>$this-&gt;addFlash()</code> quietly opens the PHP session, and a page that touches the session can never be stored by Varnish or your CDN. This bundle takes the toast out of the session so your anonymous pages can stay in the cache.</p>
 
       <div class="install" role="group" aria-label="Install command">
         <div class="install__cmd" id="installCmd"><span class="pr">$</span>composer require marilenarm/turbo-toast-bundle</div>
@@ -349,9 +349,9 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
         <h2 class="head">One flash message.<br>Zero cache hits.</h2>
       </div>
       <div class="prose reveal">
-        <p>The session lock is paid once per request — whatever opens the session. On an otherwise stateless page, a flash message is often the <em>only</em> thing that opens it.</p>
+        <p>The session lock is paid once per request, whatever opens the session. On an otherwise stateless page, a flash message is often the <em>only</em> thing that opens it.</p>
         <p>Symfony reacts by marking the response <code>private</code>, so Varnish or your CDN drops it. The session lock serializes concurrent requests, so your lazy Turbo Frames stop loading in parallel. And a session cookie gets created just to say <em>“Item saved.”</em></p>
-        <p>Take the flash out of the session and the page needs no session at all. Nothing forces it uncacheable anymore.</p>
+        <p>Take the flash out and, if nothing else touches the session, the page never opens one. Symfony then has no reason left to mark it private.</p>
       </div>
     </div>
 
@@ -359,17 +359,17 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
       <div class="stat reveal">
         <div class="n">Cacheable</div>
         <h3>Full-page cache, intact</h3>
-        <p>The message travels next to the page, not inside it — carried by a stream or a cookie. Varnish and your CDN keep serving.</p>
+        <p>The message rides a Turbo Stream or a cookie instead of the page body, so Varnish and your CDN keep serving the page.</p>
       </div>
       <div class="stat reveal">
         <div class="n">Parallel</div>
         <h3>Frames stop serializing</h3>
-        <p>With no session lock, concurrent requests stop queuing behind each other — several lazy Turbo Frames can finally load at once.</p>
+        <p>Without the session lock, concurrent requests stop queuing behind each other, and several lazy Turbo Frames can load at once.</p>
       </div>
       <div class="stat reveal">
         <div class="n">Stateless</div>
-        <h3>Stateless stays stateless</h3>
-        <p>No session cookie is created just to show a notification, and that was the last thing still opening one.</p>
+        <h3>No cookie for a notification</h3>
+        <p>A route you meant to keep stateless no longer gets a session cookie because it said “Item saved”.</p>
       </div>
     </div>
   </div>
@@ -380,19 +380,19 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
   <div class="wrap">
     <p class="eyebrow reveal">Two transports, no session</p>
     <h2 class="head reveal">The toast leaves the session by one of two doors.</h2>
-    <p class="lead reveal">Which one depends only on what your controller returns — a Turbo Stream, or a full-page redirect.</p>
+    <p class="lead reveal">Which one depends only on what your controller returns: a Turbo Stream or a full-page redirect.</p>
 
     <div class="cards2">
       <div class="tcard tcard--stream reveal">
         <span class="tcard__badge">Turbo Stream</span>
         <h3>Rendered in the same response</h3>
-        <p>For Turbo and AJAX flows. The toast is generated and rendered inside the very response you return, appended to the DOM, then auto-dismissed by a small Stimulus controller. No redirect, no storage at all.</p>
+        <p>For Turbo and AJAX flows. The toast is generated and rendered inside the very response you return, appended to the DOM, then auto-dismissed by a small Stimulus controller. Nothing is redirected, nothing is stored.</p>
         <div class="mini"><span class="kw">return</span> <span class="var">$this</span>-&gt;<span class="fn">toast</span>(<span class="str">'Item saved'</span>);</div>
       </div>
       <div class="tcard tcard--cookie reveal">
         <span class="tcard__badge">Short-lived cookie</span>
         <h3>Carried across a redirect</h3>
-        <p>For classic full-page redirects. The toast rides a <code>SameSite=Lax</code> cookie, serialized at <code>kernel.response</code> and consumed client-side on the next load. The redirected-to page’s HTML stays generic — and stays cacheable.</p>
+        <p>For classic full-page redirects. The toast rides a <code>SameSite=Lax</code> cookie, serialized at <code>kernel.response</code> and consumed client-side on the next load. The page you land on keeps generic HTML, so it stays cacheable.</p>
         <div class="mini"><span class="var">$this</span>-&gt;<span class="fn">deferToast</span>(<span class="str">'Welcome back!'</span>);</div>
       </div>
     </div>
@@ -403,8 +403,8 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
 <section class="band band--dark" id="api">
   <div class="wrap">
     <p class="eyebrow reveal">The API</p>
-    <h2 class="head reveal">Two verbs. No magic.</h2>
-    <p class="lead reveal">Use the trait in any controller. The verb you pick mirrors the response you return — nothing is inferred behind your back.</p>
+    <h2 class="head reveal">Pick the verb that matches your response.</h2>
+    <p class="lead reveal">Use the trait in any controller. The verb mirrors the response you return, and nothing is inferred behind your back.</p>
 
     <table class="verbs reveal">
       <thead><tr><th>You return</th><th>You call</th></tr></thead>
@@ -453,7 +453,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
     </div>
 
     <div class="demo" role="group" aria-label="Live toast demo">
-      <span class="demo__hint">▸ A taste — same CSS, same <code>role</code>, dismissed by a click anywhere or by waiting, exactly like the bundle. The <a href="https://marilenarm.github.io/turbo-toast-demo/" target="_blank" rel="noopener">runnable demo app ↗</a> exercises every flow — redirects, custom hooks, profiler:</span>
+      <span class="demo__hint">▸ Try it here: same CSS and same <code>role</code> as the bundle, and a toast goes away when you click it or wait. For redirects, custom hooks and the profiler panel, open the <a href="https://marilenarm.github.io/turbo-toast-demo/" target="_blank" rel="noopener">runnable demo app ↗</a>.</span>
       <button class="chip chip--success" type="button" data-toast="success" data-msg="Item saved">Item saved</button>
       <button class="chip chip--error" type="button" data-toast="error" data-msg="Something went wrong">Something went wrong</button>
       <button class="chip chip--warning" type="button" data-toast="warning" data-msg="Heads up — check your input">Heads up</button>
@@ -466,26 +466,24 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
 <section class="band" id="fit">
   <div class="wrap">
     <p class="eyebrow reveal">Be honest with your profiler</p>
-    <h2 class="head reveal">This is a scalpel, not a default.</h2>
-    <p class="lead reveal">It only helps where the flash was the <em>last</em> thing forcing a session. Everywhere else, keep <code>addFlash()</code> if you like it.</p>
+    <h2 class="head reveal">Worth it on some pages, pointless on others.</h2>
+    <p class="lead reveal">It only helps where the flash was the <em>last</em> thing forcing a session open. Everywhere else, keep <code>addFlash()</code> if you like it.</p>
 
     <div class="honest">
       <div class="hcol hcol--yes reveal">
         <h3>✓ Where it shines</h3>
         <ul>
-          <li>Anonymous, cacheable pages behind a CDN — catalogs, content sites.</li>
+          <li>Anonymous, cacheable pages behind a CDN, such as catalogs or content sites.</li>
           <li>Stateless forms using <a href="https://symfony.com/blog/new-in-symfony-7-2-stateless-csrf" target="_blank" rel="noopener">stateless CSRF</a>.</li>
           <li>Lazy-frame-heavy pages that shouldn’t serialize on a lock.</li>
-          <li>Anywhere a flash was the only reason a session still opened.</li>
         </ul>
       </div>
       <div class="hcol hcol--no reveal">
         <h3>✗ Where it gains you nothing</h3>
         <ul>
-          <li>Authenticated pages — the firewall loads the token from the session anyway.</li>
+          <li>Authenticated pages, since the firewall loads the token from the session anyway.</li>
           <li>Classic session-based CSRF protection.</li>
           <li>Locale, cart, or anything else already living in the session.</li>
-          <li>The session opens regardless, so removing flashes buys you nothing.</li>
         </ul>
       </div>
     </div>
@@ -497,17 +495,17 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
 <section class="band band--tint">
   <div class="wrap">
     <p class="eyebrow reveal">In the box</p>
-    <h2 class="head reveal">Built like production infrastructure.</h2>
+    <h2 class="head reveal">The edge cases are already handled.</h2>
 
     <div class="feat">
       <div class="fcard reveal"><span class="ic">📊</span><h3>Profiler panel</h3><p>Every toast emitted per request, per transport, with queued / transported / discarded counts. Zero overhead outside debug.</p></div>
       <div class="fcard reveal"><span class="ic">♿</span><h3>Accessible</h3><p>The <code>aria-live="polite"</code> container survives Turbo Drive. Error toasts render <code>role="alert"</code> (interrupting); every other type gets <code>role="status"</code>.</p></div>
-      <div class="fcard reveal"><span class="ic">🛡️</span><h3>XSS-safe by default</h3><p>Cookie text is rendered with <code>textContent</code> only and treated as untrusted — no markup ever executes.</p></div>
-      <div class="fcard reveal"><span class="ic">🧩</span><h3>Composable streams</h3><p>Include the toast partial in your own <code>*.stream.html.twig</code> — append a row <em>and</em> notify in one response.</p></div>
+      <div class="fcard reveal"><span class="ic">🛡️</span><h3>XSS-safe by default</h3><p>Cookie text is treated as untrusted and rendered with <code>textContent</code> only, so no markup in it ever executes.</p></div>
+      <div class="fcard reveal"><span class="ic">🧩</span><h3>Composable streams</h3><p>Include the toast partial in your own <code>*.stream.html.twig</code> to append a row <em>and</em> notify in one response.</p></div>
       <div class="fcard reveal"><span class="ic">⚙️</span><h3>No config drift</h3><p>DOM id, cookie name and Stimulus identifiers are injected from PHP into the markup, so YAML and JS can’t diverge.</p></div>
       <div class="fcard reveal"><span class="ic">🎨</span><h3>Own the rendering</h3><p>Swap the template target, or cancel the <code>append</code> event to hand rendering to your own toast library.</p></div>
-      <div class="fcard reveal"><span class="ic">🚫</span><h3>5xx-safe cookie</h3><p>A request that ended in a server error discards its queued toasts — no false “success” on the next page.</p></div>
-      <div class="fcard reveal"><span class="ic">✅</span><h3>Tested & hardened</h3><p>PHPUnit + Vitest suites, CI on Symfony 6.4, 7.4 and 8.x and Symfony UX 2 and 3 across PHP 8.3 to 8.5, and a documented threat model behind every protection.</p></div>
+      <div class="fcard reveal"><span class="ic">🚫</span><h3>5xx-safe cookie</h3><p>A request that ended in a server error discards its queued toasts instead of announcing “success” on the next page.</p></div>
+      <div class="fcard reveal"><span class="ic">✅</span><h3>Tested & hardened</h3><p>PHPUnit + Vitest suites, CI on Symfony 6.4, 7.4 and 8.x and Symfony UX 2 and 3 across PHP 8.3 to 8.5, plus hardening notes that explain each protection.</p></div>
     </div>
   </div>
 </section>
@@ -534,7 +532,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
 <span class="tok-k">@import</span> <span class="tok-s">'~@marilenarm/turbo-toast/styles/toast.css'</span>;</pre></div></div>
         </div>
 
-        <span class="code-label" style="color:var(--muted); margin-top:2rem">Configuration — every value has a sane default</span>
+        <span class="code-label" style="color:var(--muted); margin-top:2rem">Configuration (every value has a default, you only override what you need)</span>
 <pre class="code" style="background:#0c1728"><span class="tok-c"># config/packages/marilena_rm_turbo_toast.yaml</span>
 <span class="tok-a">marilena_rm_turbo_toast</span>:
     <span class="tok-a">target</span>: toasts            <span class="tok-c"># DOM id of the container</span>
@@ -553,7 +551,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
     <div class="foot__grid">
       <div>
         <a class="brand" href="#top" style="font-size:1.05rem"><span class="glyph" aria-hidden="true"></span><b>turbo-toast</b><span class="crumb">/ bundle</span></a>
-        <p>Session-free flash notifications for Symfony. The notification travels next to the page, not inside it.</p>
+        <p>Session-free flash notifications for Symfony, carried by a Turbo Stream or a short-lived cookie.</p>
         <div class="kofi">If it saved your pages from the session lock, <a href="https://ko-fi.com/marilenarm" target="_blank" rel="noopener">buy me a coffee ☕</a></div>
       </div>
       <div class="foot__links">
@@ -581,7 +579,7 @@ pre.code{margin:0; font-family:var(--mono); font-size:0.83rem; line-height:1.75;
     var el = document.createElement('div');
     el.className = 'toast toast--' + type;
     el.setAttribute('role', type === 'error' ? 'alert' : 'status');  // error interrupts, others polite — as the bundle does
-    el.textContent = message;                // textContent only, dismiss on click anywhere — matches the bundle
+    el.textContent = message;                // textContent only, dismissed by clicking the toast, as in the bundle
     region.appendChild(el);
     // force reflow so the transition plays, then slide in
     void el.offsetWidth;
